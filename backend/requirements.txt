@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+sqlalchemy
+pgvector
+psycopg2-binary
+pdfplumber
+sentence-transformers
+google-generativeai
+anthropic
+python-dotenv
+streamlit
+requests
