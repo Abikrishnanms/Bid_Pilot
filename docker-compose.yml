@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: bidpilot_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bidpilot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bidpilot_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-bidpilot_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bidpilot_user} -d ${POSTGRES_DB:-bidpilot_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bidpilot_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-bidpilot_user}:${POSTGRES_PASSWORD:-bidpilot_pass}@postgres:5432/${POSTGRES_DB:-bidpilot_db}
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-sentence-transformers}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

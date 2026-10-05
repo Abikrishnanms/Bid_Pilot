@@ -1,0 +1,166 @@
+{
+  "title": "Enterprise AI Knowledge Management Platform",
+  "organization": "National Health Data Authority (NHDA)",
+  "deadline": "October 30, 2026",
+  "estimated_value": "$750,000 USD",
+  "location": "Washington, D.C.",
+  "matches": [
+    {
+      "requirement": "Vendor must have at least 5 years of experience in enterprise software development.",
+      "type": "eligibility",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Vendor must have a core technical team of at least 25 full-time engineers.",
+      "type": "eligibility",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Must build a microservices backend using Python FastAPI and PostgreSQL with vector search capability (pgvector).",
+      "type": "technical",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Must support retrieval-augmented generation (RAG) across large PDF/text document corpuses.",
+      "type": "technical",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "System must be deployed using Docker containerization.",
+      "type": "technical",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Vendor must have successfully delivered at least 2 enterprise AI or healthcare search platforms within the past 4 years.",
+      "type": "experience",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "ISO 27001 Information Security Management Certification.",
+      "type": "certification",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "SOC 2 Type II Compliance audit verification.",
+      "type": "certification",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "CMMI Level 3 Certification (Mandatory for government vendors).",
+      "type": "certification",
+      "status": "NOT_SATISFIED",
+      "explanation": "No evidence found in company profile or documents for CMMI Level 3 certification. Company holds ISO 27001 and SOC 2 Type II, but lacks CMMI Level 3.",
+      "evidence": []
+    },
+    {
+      "requirement": "Fully functional microservices API backend and interactive web user interface.",
+      "type": "deliverable",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Comprehensive user documentation, API specification, and deployment guide.",
+      "type": "deliverable",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "12-month maintenance and support SLA with 24/7 technical incident response.",
+      "type": "deliverable",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Technical approach and vector architecture scalability: 40%",
+      "type": "evaluation",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Past performance and enterprise project references: 30%",
+      "type": "evaluation",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Security compliance and certifications: 20%",
+      "type": "evaluation",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    },
+    {
+      "requirement": "Pricing and cost effectiveness: 10%",
+      "type": "evaluation",
+      "status": "SATISFIED",
+      "explanation": "Apex has successfully delivered 2 major enterprise projects in healthcare analytics ($1.45M) and enterprise AI vector search ($850K) within the past 2 years.",
+      "evidence": [
+        "Project 1: State Health Dept Patient Portal & Analytics Infrastructure (2023-2024)",
+        "Project 2: Enterprise AI Knowledge Graph & Vector Search Platform (2024)"
+      ]
+    }
+  ]
+}
