@@ -1,11 +1,16 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from sqlalchemy import text
 from .db.database import engine, Base
 from .models import schema
 from .api import tenders
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Ensure pgvector extension is enabled in PostgreSQL
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        conn.commit()
     # Create database tables
     Base.metadata.create_all(bind=engine)
     yield

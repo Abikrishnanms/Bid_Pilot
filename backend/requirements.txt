@@ -9,5 +9,4 @@ sentence-transformers
 google-generativeai
 anthropic
 python-dotenv
-streamlit
 requests

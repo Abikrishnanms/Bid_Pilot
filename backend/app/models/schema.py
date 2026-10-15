@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
-from .database import Base
+from ..db.database import Base
 
 class Tender(Base):
     __tablename__ = "tenders"

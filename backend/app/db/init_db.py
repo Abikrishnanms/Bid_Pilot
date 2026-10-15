@@ -1,11 +1,15 @@
 import os
 import json
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from .database import engine, SessionLocal, Base
 from ..models import schema
 from ..services.embedding_service import EmbeddingService
 
 def seed_database():
+    with engine.connect() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        conn.commit()
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:

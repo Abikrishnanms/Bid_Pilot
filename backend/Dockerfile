@@ -9,7 +9,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+
+# Upgrade pip to support modern wheel metadata standards
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install lightweight CPU-only PyTorch (~180MB instead of ~4GB with CUDA)
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
+
+# Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
 
 COPY . .
 
