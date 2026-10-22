@@ -1,0 +1,82 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 3 0 R >>
+endobj
+2 0 obj
+<< /Type /Outlines /Count 0 >>
+endobj
+3 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /Name /F1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 3 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 4 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 1943 >>
+stream
+BT /F1 16 Tf 50 750 Td (MOCK IT SOLUTIONS - CORPORATE CAPABILITY STATEMENT) Tj ET
+BT /F1 10 Tf
+50 710 Td (Vendor Registration: CORP-884920 | Headquarters: Austin, Texas | Established: 2013) Tj
+-50 -710 Td
+50 692 Td (Company Name: Mock IT Solutions Inc.) Tj
+-50 -692 Td
+50 674 Td () Tj
+-50 -674 Td
+50 656 Td (SECTION 1: Executive Profile & Experience) Tj
+-50 -656 Td
+50 638 Td (- Mock IT Solutions has over 10+ years of experience in enterprise cloud architecture.) Tj
+-50 -638 Td
+50 620 Td (- Core team of 52 full-time certified Python and React developers and DevOps architects.) Tj
+-50 -620 Td
+50 602 Td (- Proven track record with federal and healthcare cloud migrations.) Tj
+-50 -602 Td
+50 584 Td () Tj
+-50 -584 Td
+50 566 Td (SECTION 2: Technical Capabilities) Tj
+-50 -566 Td
+50 548 Td (- Backend engineering using Python 3.10+, FastAPI, SQLAlchemy, and Celery.) Tj
+-50 -548 Td
+50 530 Td (- Production PostgreSQL with pgvector deployments handling millions of vector embeddings.) Tj
+-50 -530 Td
+50 512 Td (- In-house AI/RAG solutions using Sentence-Transformers and LLM integration.) Tj
+-50 -512 Td
+50 494 Td (- Containerized infrastructure using Docker, Docker Compose, and Kubernetes.) Tj
+-50 -494 Td
+50 476 Td () Tj
+-50 -476 Td
+50 458 Td (SECTION 3: Certifications & Compliance Status) Tj
+-50 -458 Td
+50 440 Td (- ISO 9001:2015 certified for Quality Management Systems \(Certificate #QMS-99482-US\).) Tj
+-50 -440 Td
+50 422 Td (- SOC 2 Type II compliant with annual third-party security audits.) Tj
+-50 -422 Td
+50 404 Td (- ISO 27001 status: Stage 2 audit in progress \(Official certificate expected Q1 2027\).) Tj
+-50 -404 Td
+50 386 Td () Tj
+-50 -386 Td
+50 368 Td (SECTION 4: Past Project References) Tj
+-50 -368 Td
+50 350 Td (- Project Alpha: State Health Authority Vector Search and RAG Platform \(.2M value\).) Tj
+-50 -350 Td
+50 332 Td (- Project Beta: Enterprise Logistics Cloud Migration with 99.99% uptime SLA.) Tj
+-50 -332 Td
+ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000104 00000 n 
+0000000161 00000 n 
+0000000241 00000 n 
+0000000367 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2361
+%%EOF
