@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+venv/
+.env
+data/company_docs/
+data/sample_tenders/
