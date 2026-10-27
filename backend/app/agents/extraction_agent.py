@@ -10,19 +10,12 @@ class ExtractionAgent:
         self.pdf_parser = PDFParser()
         self.llm_provider = get_llm_provider()
 
-    def process_tender(self, file_path: str) -> ExtractedRequirements:
+    def process_text(self, raw_text: str) -> ExtractedRequirements:
         """
-        Main pipeline to parse PDF and extract structured requirements.
+        Use LLM to extract structured data from raw tender text.
         """
-        logger.info(f"Starting extraction for {file_path}")
-        
-        # Step 1: Parse PDF to raw text
-        raw_text = self.pdf_parser.extract_text(file_path)
-        logger.info(f"Extracted {len(raw_text)} characters of text from PDF.")
-        
-        # Step 2: Use LLM to extract structured data
         prompt = (
-            "Analyze the following tender document and extract the requirements according "
+            "Analyze the following tender document or specification and extract the requirements according "
             "to the specified schema. If a field is not found, leave it empty or provide a logical default."
         )
         
@@ -37,3 +30,12 @@ class ExtractionAgent:
         except Exception as e:
             logger.error(f"Failed to extract structured data: {str(e)}")
             raise
+
+    def process_tender(self, file_path: str) -> ExtractedRequirements:
+        """
+        Main pipeline to parse PDF and extract structured requirements.
+        """
+        logger.info(f"Starting extraction for {file_path}")
+        raw_text = self.pdf_parser.extract_text(file_path)
+        logger.info(f"Extracted {len(raw_text)} characters of text from PDF.")
+        return self.process_text(raw_text)

@@ -10,3 +10,4 @@ google-generativeai
 anthropic
 python-dotenv
 requests
+python-multipart
