@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate, useSearchParams, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-  Briefcase, LayoutDashboard, Upload, FileText, BarChart2,
-  CheckCircle, Search, PenTool, ShieldCheck, File,
-  Loader2, Check, AlertTriangle, Download, RefreshCw, Send, CheckCircle2, XCircle,
-  Trash2, UploadCloud, Eye, FileUp
+  Briefcase, LayoutDashboard, UploadCloud, FileText, CheckCircle,
+  PenTool, ShieldCheck, File, Loader2, Check, AlertTriangle,
+  RefreshCw, Send, CheckCircle2, XCircle, Trash2, Eye,
+  Building2, ArrowRight, ArrowLeft, Copy, Layers, ExternalLink
 } from 'lucide-react';
 
 const API_BASE = "http://localhost:8000/api";
 
 function Sidebar() {
   const navItems = [
-    { path: "/", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
-    { path: "/upload", icon: <Upload size={20} />, label: "Tenders & Discovery" },
-    { path: "/documents", icon: <FileText size={20} />, label: "Company Documents" },
-    { path: "/matches", icon: <BarChart2 size={20} />, label: "Match & Triage" },
-    { path: "/compliance", icon: <CheckCircle size={20} />, label: "Compliance Report" },
-    { path: "/proposal", icon: <PenTool size={20} />, label: "Proposal Generator" },
-    { path: "/review", icon: <ShieldCheck size={20} />, label: "Review & Approval" },
+    { path: "/", icon: <LayoutDashboard size={20} />, label: "Dashboard & Pipeline" },
+    { path: "/workspace", icon: <Layers size={20} />, label: "Tender Workspace" },
+    { path: "/company", icon: <Building2 size={20} />, label: "Company Profile & Docs" },
   ];
 
   return (
@@ -29,17 +25,30 @@ function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === "/"}
             className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
           >
             {item.icon} {item.label}
           </NavLink>
         ))}
       </div>
+      <div style={{ marginTop: 'auto', padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.2rem' }}>AI Autonomous Core</div>
+        <div>Gemini 3.5 & pgvector</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.4rem', color: 'var(--success)' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }}></span>
+          <span>Pipeline Active</span>
+        </div>
+      </div>
     </div>
   );
 }
 
+// ==========================================
+// 1. EXECUTIVE DASHBOARD & PIPELINE
+// ==========================================
 function Dashboard() {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState({
     active_tenders: 0,
     qualified_go_tenders: 0,
@@ -55,7 +64,9 @@ function Dashboard() {
   });
   const [tenders, setTenders] = useState([]);
   const [fetching, setFetching] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   const [msg, setMsg] = useState("");
+  const [uploadMsg, setUploadMsg] = useState("");
 
   const loadData = async () => {
     try {
@@ -88,6 +99,28 @@ function Dashboard() {
     }
   };
 
+  const handleUploadTenderPdf = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingPdf(true);
+    setUploadMsg("");
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post(`${API_BASE}/tenders/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setUploadMsg(`Successfully uploaded & extracted '${file.name}' (${res.data.title})!`);
+      await loadData();
+      navigate(`/workspace?id=${res.data.id || ''}`);
+    } catch (err) {
+      setUploadMsg("Upload failed: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setUploadingPdf(false);
+      e.target.value = null;
+    }
+  };
+
   const handleUpdateStatus = async (id, status) => {
     try {
       await axios.patch(`${API_BASE}/tenders/${id}/status`, { status });
@@ -99,17 +132,34 @@ function Dashboard() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>Executive Dashboard</h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            Real-time procurement feed intelligence, pgvector capability matching, and automated bid generation.
+          </p>
         </div>
-        <button className="btn" onClick={handleAutoFetch} disabled={fetching}>
-          {fetching ? <><Loader2 className="spinner" size={18} /> Discovering...</> : <><RefreshCw size={18} /> Fetch From Gov Feeds</>}
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button className="btn" onClick={handleAutoFetch} disabled={fetching}>
+            {fetching ? <><Loader2 className="spinner" size={18} /> Polling Feeds...</> : <><RefreshCw size={18} /> Ingest Live Gov Feeds</>}
+          </button>
+          <label className="btn btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: uploadingPdf ? 'not-allowed' : 'pointer', margin: 0 }}>
+            {uploadingPdf ? <><Loader2 className="spinner" size={18} /> Parsing PDF...</> : <><UploadCloud size={18} /> Upload RFP PDF</>}
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleUploadTenderPdf}
+              disabled={uploadingPdf}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
       </div>
 
       {msg && <div className="card" style={{ background: '#f0fdf4', borderLeft: '4px solid var(--success)', padding: '0.8rem', marginBottom: '1.5rem' }}>{msg}</div>}
+      {uploadMsg && <div className="card" style={{ background: '#f0fdf4', borderLeft: '4px solid var(--success)', padding: '0.8rem', marginBottom: '1.5rem' }}>{uploadMsg}</div>}
 
+      {/* KPI Cards */}
       <div className="metrics-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <div className="metric-card">
           <span className="metric-label">Discovered Tenders</span>
@@ -137,29 +187,44 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Tender Pipeline Table */}
       <div className="card" style={{ marginTop: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>Active Tender Opportunities</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div>
+            <h3>Active Tender Pipeline ({tenders.length})</h3>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Click any tender to open its end-to-end AI qualification, proposal draft, and email dispatch workspace.
+            </span>
+          </div>
+        </div>
+
         {tenders.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No tenders discovered yet. Click "Fetch From Gov Feeds" to poll live opportunities.</p>
+          <p style={{ color: 'var(--text-muted)', padding: '1rem 0' }}>
+            No tenders discovered yet. Click "Ingest Live Gov Feeds" to poll public notices or "Upload RFP PDF".
+          </p>
         ) : (
           <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem' }}>
-                <th style={{ padding: '0.75rem 0.5rem' }}>Ref ID</th>
-                <th>Title</th>
-                <th>Estimated Value</th>
+                <th style={{ padding: '0.75rem 0.5rem' }}>Tender Opportunity</th>
+                <th>Estimated Budget</th>
                 <th>Fit Score</th>
-                <th>Triage Status</th>
+                <th>Triage Decision</th>
                 <th>Proposal</th>
-                <th>Bid Outcome</th>
+                <th>Outcome</th>
+                <th style={{ textAlign: 'right' }}>Workspace</th>
               </tr>
             </thead>
             <tbody>
               {tenders.map((t) => (
                 <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '0.75rem 0.5rem', fontWeight: 600 }}>{t.reference_id || `TEN-${t.id}`}</td>
-                  <td>{t.title}</td>
-                  <td style={{ fontWeight: 500 }}>{t.estimated_value || 'N/A'}</td>
+                  <td style={{ padding: '0.75rem 0.5rem' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{t.title}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                      Issuer: <strong>{t.organization || 'Public Sector'}</strong> &bull; Ref: {t.reference_id ? t.reference_id.slice(0, 24) + '...' : `TEN-${t.id}`}
+                    </div>
+                  </td>
+                  <td style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{t.estimated_value || 'TBD'}</td>
                   <td>
                     <span style={{ fontWeight: 700, color: t.fit_score >= 70 ? 'var(--success)' : t.fit_score >= 50 ? 'var(--warning)' : 'var(--danger)' }}>
                       {t.fit_score !== null ? `${t.fit_score}%` : 'Pending'}
@@ -167,19 +232,21 @@ function Dashboard() {
                   </td>
                   <td>
                     <span className={`status-badge ${t.status === 'WON' || t.status === 'PROPOSAL_READY' || t.status === 'SUBMITTED' ? 'SATISFIED' : t.status === 'NO_GO' || t.status === 'LOST' ? 'NOT_SATISFIED' : 'PARTIALLY_SATISFIED'}`}>
-                      {t.status}
+                      {t.status === 'PROPOSAL_READY' ? 'GO (Qualified)' : t.status}
                     </span>
                   </td>
                   <td>
                     {t.has_proposal ? (
-                      <span style={{ color: 'var(--success)', fontWeight: 500 }}><Check size={16} style={{ verticalAlign: 'middle' }} /> {t.proposal_status || 'Drafted'}</span>
+                      <span style={{ color: 'var(--success)', fontWeight: 500, fontSize: '0.85rem' }}>
+                        <Check size={15} style={{ verticalAlign: 'middle' }} /> {t.proposal_status || 'Drafted'}
+                      </span>
                     ) : (
-                      <span style={{ color: 'var(--text-muted)' }}>None</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>None</span>
                     )}
                   </td>
                   <td>
                     {t.status === 'SUBMITTED' ? (
-                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <div style={{ display: 'flex', gap: '0.3rem' }}>
                         <button
                           className="btn"
                           style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: '#22c55e', color: '#fff' }}
@@ -200,8 +267,16 @@ function Dashboard() {
                     ) : t.status === 'LOST' ? (
                       <span style={{ color: 'var(--danger)', fontWeight: 600, fontSize: '0.85rem' }}>Lost</span>
                     ) : (
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>In Progress</span>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>In Pipeline</span>
                     )}
+                  </td>
+                  <td style={{ textAlign: 'right' }}>
+                    <button
+                      className="btn btn-sm btn-outline"
+                      onClick={() => navigate(`/workspace?id=${t.id}`)}
+                    >
+                      Open Workspace <ArrowRight size={14} style={{ verticalAlign: 'middle', marginLeft: '0.2rem' }} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -213,116 +288,490 @@ function Dashboard() {
   );
 }
 
-function TenderUpload() {
-  const [tenders, setTenders] = useState([]);
-  const [fetching, setFetching] = useState(false);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [uploadMsg, setUploadMsg] = useState("");
+// ==========================================
+// 2. UNIFIED TENDER WORKSPACE (ALL-IN-ONE)
+// ==========================================
+function TenderWorkspace() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const tenderIdParam = searchParams.get('id');
 
-  const loadTenders = async () => {
+  const [tenders, setTenders] = useState([]);
+  const [selectedTenderId, setSelectedTenderId] = useState(tenderIdParam ? Number(tenderIdParam) : null);
+  const [tender, setTender] = useState(null);
+  const [activeTab, setActiveTab] = useState("triage"); // "triage" | "proposal" | "review"
+
+  // Company profile for sender
+  const [companyProfile, setCompanyProfile] = useState(null);
+
+  // Agent execution states
+  const [loadingTender, setLoadingTender] = useState(false);
+  const [triageLoading, setTriageLoading] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Outputs
+  const [proposalText, setProposalText] = useState("");
+  const [reviewResult, setReviewResult] = useState(null);
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  // Load tenders catalog
+  const loadTendersList = async () => {
     try {
       const res = await axios.get(`${API_BASE}/tenders/`);
       setTenders(res.data);
+      if (res.data.length > 0 && !selectedTenderId) {
+        setSelectedTenderId(res.data[0].id);
+      }
+    } catch (e) {
+      console.error("Failed to load tenders list", e);
+    }
+  };
+
+  const loadCompanyProfile = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/company/profile`);
+      setCompanyProfile(res.data);
+    } catch (e) {
+      console.error("Failed to load company profile", e);
+    }
+  };
+
+  const loadTenderDetail = async (id) => {
+    if (!id) return;
+    setLoadingTender(true);
+    setMsg("");
+    try {
+      const res = await axios.get(`${API_BASE}/tenders/${id}`);
+      setTender(res.data);
+      setRecipientEmail(res.data.issuer_email || "");
+      if (res.data.proposal) {
+        setProposalText(res.data.proposal.full_content || "");
+      } else {
+        setProposalText("");
+      }
+      if (res.data.proposal?.review_notes) {
+        try {
+          const parsed = JSON.parse(res.data.proposal.review_notes);
+          setReviewResult(parsed);
+        } catch {
+          // simple string note
+        }
+      }
     } catch (e) {
       console.error(e);
+      setMsg("Failed to load tender details: " + e.message);
+    } finally {
+      setLoadingTender(false);
     }
   };
 
   useEffect(() => {
-    loadTenders();
+    loadTendersList();
+    loadCompanyProfile();
   }, []);
 
-  const handleFetchFeeds = async () => {
-    setFetching(true);
+  useEffect(() => {
+    if (tenderIdParam) {
+      setSelectedTenderId(Number(tenderIdParam));
+    }
+  }, [tenderIdParam]);
+
+  useEffect(() => {
+    if (selectedTenderId) {
+      setSearchParams({ id: selectedTenderId });
+      loadTenderDetail(selectedTenderId);
+    }
+  }, [selectedTenderId]);
+
+  // Actions
+  const handleRunTriage = async () => {
+    if (!selectedTenderId) return;
+    setTriageLoading(true);
     setMsg("");
     try {
-      const res = await axios.post(`${API_BASE}/tenders/fetch_new`);
-      setMsg(res.data.message);
-      await loadTenders();
+      await axios.post(`${API_BASE}/tenders/${selectedTenderId}/triage`);
+      setMsg("AI Qualification & Evidence Matching complete!");
+      await loadTenderDetail(selectedTenderId);
     } catch (e) {
-      setMsg("Error fetching feeds: " + (e.response?.data?.detail || e.message));
+      setMsg("Triage failed: " + (e.response?.data?.detail || e.message));
     } finally {
-      setFetching(false);
+      setTriageLoading(false);
     }
   };
 
-  const handleUploadTenderPdf = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingPdf(true);
-    setUploadMsg("");
-    const formData = new FormData();
-    formData.append("file", file);
+  const handleGenerateProposal = async () => {
+    if (!selectedTenderId) return;
+    setDraftLoading(true);
+    setMsg("");
     try {
-      const res = await axios.post(`${API_BASE}/tenders/upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setUploadMsg(`Successfully uploaded & extracted '${file.name}' (${res.data.title})!`);
-      await loadTenders();
-    } catch (err) {
-      setUploadMsg("Upload failed: " + (err.response?.data?.detail || err.message));
+      const res = await axios.post(`${API_BASE}/tenders/${selectedTenderId}/proposal`);
+      setMsg("Proposal generated successfully with pgvector citations!");
+      await loadTenderDetail(selectedTenderId);
+      setActiveTab("proposal");
+    } catch (e) {
+      setMsg("Draft generation failed: " + (e.response?.data?.detail || e.message));
     } finally {
-      setUploadingPdf(false);
-      e.target.value = null;
+      setDraftLoading(false);
     }
+  };
+
+  const handleReviewProposal = async () => {
+    if (!selectedTenderId) return;
+    setReviewLoading(true);
+    setMsg("");
+    try {
+      const res = await axios.post(`${API_BASE}/tenders/${selectedTenderId}/proposal/review`);
+      setReviewResult(res.data);
+      setMsg("Anti-hallucination verification audit completed!");
+      await loadTenderDetail(selectedTenderId);
+    } catch (e) {
+      setMsg("Fact-check audit failed: " + (e.response?.data?.detail || e.message));
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  const handleApproveAndSubmit = async () => {
+    if (!companyProfile?.email) {
+      return alert("Please register your company email in Company Profile before submitting.");
+    }
+    if (!recipientEmail.trim()) {
+      return alert("Please enter the issuing authority's procurement submission email.");
+    }
+
+    setSubmitLoading(true);
+    setMsg("");
+    try {
+      const res = await axios.post(`${API_BASE}/tenders/${selectedTenderId}/proposal/submit`, {
+        recipient_email: recipientEmail.trim(),
+        notes: "Approved by Senior Bid Director"
+      });
+      setMsg(res.data.message);
+      await loadTenderDetail(selectedTenderId);
+    } catch (e) {
+      setMsg("Submission failed: " + (e.response?.data?.detail || e.message));
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleUpdateOutcome = async (newStatus) => {
+    try {
+      await axios.patch(`${API_BASE}/tenders/${selectedTenderId}/status`, { status: newStatus });
+      await loadTenderDetail(selectedTenderId);
+      setMsg(`Bid status updated to ${newStatus}`);
+    } catch (e) {
+      alert("Failed to update status: " + e.message);
+    }
+  };
+
+  const handleCopyProposal = () => {
+    if (!proposalText) return;
+    navigator.clipboard.writeText(proposalText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div>
-      <h1>Automated Tender Discovery & Ingestion</h1>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-        {/* Option A: Live Gov Feed Poller */}
-        <div className="card">
-          <h3>1. Live Government Feeds</h3>
-          <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1rem' }}>
-            Automatically ingest real public tenders from the UK Contracts Finder OCDS portal.
+      {/* Top Bar with Tender Switcher */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1>Tender Opportunity Workspace</h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            Single-screen AI lifecycle: verify compliance, draft evidence proposal, fact-check, and dispatch email.
           </p>
-          <button className="btn" onClick={handleFetchFeeds} disabled={fetching}>
-            {fetching ? <><Loader2 className="spinner" size={18} /> Polling Feeds...</> : <><RefreshCw size={18} /> Ingest Live Gov Feeds</>}
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <label style={{ fontWeight: 600, fontSize: '0.85rem' }}>Switch Tender:</label>
+          <select
+            value={selectedTenderId || ""}
+            onChange={e => setSelectedTenderId(Number(e.target.value))}
+            style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border)', maxWidth: '300px' }}
+          >
+            {tenders.map(t => (
+              <option key={t.id} value={t.id}>
+                {t.title.slice(0, 35)}... ({t.reference_id ? t.reference_id.slice(0, 10) : `TEN-${t.id}`})
+              </option>
+            ))}
+          </select>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate("/")}>
+            &larr; Back to Pipeline
           </button>
-          {msg && <p style={{ marginTop: '1rem', color: 'var(--success)', fontWeight: 500 }}>{msg}</p>}
-        </div>
-
-        {/* Option B: Custom RFP PDF Upload */}
-        <div className="card">
-          <h3>2. Upload Custom RFP PDF</h3>
-          <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1rem' }}>
-            Upload any custom government or enterprise solicitation PDF to extract requirements.
-          </p>
-          <label className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: uploadingPdf ? 'not-allowed' : 'pointer' }}>
-            {uploadingPdf ? <><Loader2 className="spinner" size={18} /> Extracting PDF...</> : <><UploadCloud size={18} /> Select Tender PDF</>}
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleUploadTenderPdf}
-              disabled={uploadingPdf}
-              style={{ display: 'none' }}
-            />
-          </label>
-          {uploadMsg && <p style={{ marginTop: '1rem', color: 'var(--success)', fontWeight: 500 }}>{uploadMsg}</p>}
         </div>
       </div>
 
-      <div className="card">
-        <h3>Discovered Tender Catalog</h3>
-        {tenders.map((t) => (
-          <div key={t.id} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h4>{t.title}</h4>
-              <span className={`status-badge ${t.fit_score >= 70 ? 'SATISFIED' : 'PARTIALLY_SATISFIED'}`}>Fit: {t.fit_score || 0}%</span>
+      {loadingTender && <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}><Loader2 className="spinner" size={16} /> Loading tender opportunity...</p>}
+
+      {tender && (
+        <>
+          {/* Tender Opportunity Header Banner */}
+          <div className="tender-header-banner">
+            <div style={{ flex: 1, paddingRight: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, background: '#e2e8f0', color: '#334155', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>
+                  {tender.reference_id || `TEN-${tender.id}`}
+                </span>
+                <span className={`status-badge ${tender.status === 'WON' || tender.status === 'PROPOSAL_READY' || tender.status === 'SUBMITTED' ? 'SATISFIED' : tender.status === 'NO_GO' || tender.status === 'LOST' ? 'NOT_SATISFIED' : 'PARTIALLY_SATISFIED'}`}>
+                  {tender.status === 'PROPOSAL_READY' ? 'GO (Qualified)' : tender.status}
+                </span>
+              </div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                {tender.title}
+              </h2>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                <span>Issuing Authority: <strong>{tender.organization || 'Public Agency'}</strong></span>
+                <span>Budget: <strong>{tender.estimated_value || 'Commercial TBD'}</strong></span>
+                <span>Deadline: <strong>{tender.deadline || 'Standard Notice'}</strong></span>
+                <span>Submission Email: <strong>{tender.issuer_email || 'Enter in Review stage'}</strong></span>
+              </div>
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-              Issuer: <strong>{t.organization}</strong> &bull; Budget: <strong>{t.estimated_value}</strong> &bull; Deadline: <strong>{t.deadline}</strong>
-            </p>
+
+            <div style={{ textAlign: 'right', minWidth: '160px', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Bid Readiness</div>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: tender.fit_score >= 70 ? 'var(--success)' : tender.fit_score >= 50 ? 'var(--warning)' : 'var(--danger)' }}>
+                {tender.fit_score !== null ? `${tender.fit_score}%` : 'Pending'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {tender.requirements?.length || 0} requirements analyzed
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
+
+          {msg && (
+            <div className="card" style={{ background: '#f0fdf4', borderLeft: '4px solid var(--success)', padding: '0.8rem', marginBottom: '1.5rem' }}>
+              {msg}
+            </div>
+          )}
+
+          {/* Unified 3-Stage Tabs */}
+          <div className="tabs-container">
+            <button
+              className={`tab-btn ${activeTab === 'triage' ? 'active' : ''}`}
+              onClick={() => setActiveTab('triage')}
+            >
+              <span>1. Triage & Compliance Evidence</span>
+              <span className="tab-badge">{tender.requirements?.length || 0} Req</span>
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'proposal' ? 'active' : ''}`}
+              onClick={() => setActiveTab('proposal')}
+            >
+              <span>2. AI Proposal Drafter</span>
+              <span className="tab-badge">{tender.proposal ? 'Drafted' : 'Pending'}</span>
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'review' ? 'active' : ''}`}
+              onClick={() => setActiveTab('review')}
+            >
+              <span>3. Anti-Hallucination & Dispatch</span>
+              <span className="tab-badge">{tender.status === 'SUBMITTED' ? 'Sent' : 'Ready'}</span>
+            </button>
+          </div>
+
+          {/* ======================================= */}
+          {/* STAGE 1: TRIAGE & REQUIREMENT CITATIONS */}
+          {/* ======================================= */}
+          {activeTab === 'triage' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div>
+                  <h3>Requirement-by-Requirement Evidence Citations</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    Each tender requirement is cross-matched with your company documents in pgvector.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button className="btn" onClick={handleRunTriage} disabled={triageLoading}>
+                    {triageLoading ? <><Loader2 className="spinner" size={16} /> Evaluating...</> : <><RefreshCw size={16} /> Re-run AI Triage</>}
+                  </button>
+                  <button className="btn btn-outline" onClick={() => setActiveTab('proposal')}>
+                    Next: Draft Proposal &rarr;
+                  </button>
+                </div>
+              </div>
+
+              {(!tender.requirements || tender.requirements.length === 0) ? (
+                <div className="card" style={{ color: 'var(--text-muted)' }}>
+                  No requirements extracted for this tender yet. Click "Re-run AI Triage" to evaluate.
+                </div>
+              ) : (
+                tender.requirements.map((req, idx) => (
+                  <div key={idx} className="card" style={{ marginBottom: '1rem', borderLeft: `4px solid ${req.status === 'SATISFIED' ? 'var(--success)' : req.status === 'PARTIALLY_SATISFIED' ? 'var(--warning)' : 'var(--danger)'}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                      <h4 style={{ fontSize: '1rem' }}>{req.description}</h4>
+                      <span className={`status-badge ${req.status}`}>{req.status.replace("_", " ")}</span>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                      <strong>AI Analysis:</strong> {req.explanation || "Evaluated by pgvector cosine search against company ground truth"}
+                    </p>
+                    {req.evidence && (
+                      <div className="evidence-box">
+                        <strong>Cited Company Evidence:</strong> {req.evidence}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* ======================================= */}
+          {/* STAGE 2: PROPOSAL DRAFTER              */}
+          {/* ======================================= */}
+          {activeTab === 'proposal' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div>
+                  <h3>Evidence-Grounded Bid Proposal</h3>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                    Multi-section proposal drafted by Gemini strictly grounded in your cited company evidence.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <button className="btn" onClick={handleGenerateProposal} disabled={draftLoading}>
+                    {draftLoading ? <><Loader2 className="spinner" size={16} /> Drafting with GenAI...</> : <><PenTool size={16} /> {tender.proposal ? 'Regenerate Draft' : 'Draft Proposal with GenAI'}</>}
+                  </button>
+                  {proposalText && (
+                    <>
+                      <button className="btn btn-secondary btn-sm" onClick={handleCopyProposal}>
+                        <Copy size={14} /> {copied ? 'Copied!' : 'Copy Text'}
+                      </button>
+                      <button className="btn btn-outline" onClick={() => setActiveTab('review')}>
+                        Next: Review & Submit &rarr;
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {proposalText ? (
+                <div className="card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      Proposal Content &bull; Status: <strong style={{ color: 'var(--primary)' }}>{tender.proposal?.status || 'DRAFT'}</strong>
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      You can edit the draft directly before running fact-check
+                    </span>
+                  </div>
+                  <textarea
+                    value={proposalText}
+                    onChange={e => setProposalText(e.target.value)}
+                    style={{ minHeight: '450px', width: '100%', fontFamily: 'monospace', fontSize: '0.9rem', padding: '1rem', lineHeight: '1.6' }}
+                  />
+                </div>
+              ) : (
+                <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+                  <PenTool size={40} style={{ color: 'var(--text-muted)', marginBottom: '1rem' }} />
+                  <h4>No Proposal Drafted Yet</h4>
+                  <p style={{ color: 'var(--text-muted)', margin: '0.5rem auto 1.5rem', maxWidth: '450px' }}>
+                    The Proposal Drafter Agent uses Gemini to synthesize the buyer's RFP specifications and your indexed vector evidence into 4 comprehensive sections.
+                  </p>
+                  <button className="btn" onClick={handleGenerateProposal} disabled={draftLoading}>
+                    {draftLoading ? <><Loader2 className="spinner" size={16} /> Drafting with GenAI...</> : "Draft Proposal with GenAI"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ======================================= */}
+          {/* STAGE 3: REVIEW & EMAIL DISPATCH       */}
+          {/* ======================================= */}
+          {activeTab === 'review' && (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                {/* 1. Fact-Checker Agent Card */}
+                <div className="card">
+                  <h3>1. Anti-Hallucination Audit</h3>
+                  <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1rem', fontSize: '0.9rem' }}>
+                    Adversarially cross-examines proposal claims against ground-truth company text chunks.
+                  </p>
+                  <button className="btn" onClick={handleReviewProposal} disabled={reviewLoading || !proposalText}>
+                    {reviewLoading ? <><Loader2 className="spinner" size={16} /> Auditing Claims...</> : <><ShieldCheck size={16} /> Run Fact-Checker Agent</>}
+                  </button>
+
+                  {reviewResult && (
+                    <div style={{ marginTop: '1.25rem', padding: '1rem', background: reviewResult.passed ? '#f0fdf4' : '#fff1f2', borderLeft: `4px solid ${reviewResult.passed ? 'var(--success)' : 'var(--danger)'}`, borderRadius: '4px' }}>
+                      <div style={{ fontWeight: 700, color: reviewResult.passed ? 'var(--success)' : 'var(--danger)' }}>
+                        Audit Result: {reviewResult.review_score}/100 ({reviewResult.passed ? "PASSED" : "FLAGS DETECTED"})
+                      </div>
+                      <p style={{ marginTop: '0.4rem', fontSize: '0.85rem' }}>
+                        <strong>Findings:</strong> {reviewResult.recommendations?.join("; ") || "All claims verified against vector chunks."}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Email Dispatch Station */}
+                <div className="card">
+                  <h3>2. Automated Submission Dispatch</h3>
+                  <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1rem', fontSize: '0.9rem' }}>
+                    Sends the verified proposal directly from your company to the official buyer email.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>From (Registered Company):</label>
+                      <div style={{ padding: '0.5rem 0.75rem', background: '#f8fafc', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
+                        {companyProfile?.email ? (
+                          <span><strong>{companyProfile.name}</strong> &lt;{companyProfile.email}&gt;</span>
+                        ) : (
+                          <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
+                            ⚠️ Register sender email in "Company Profile"
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>To (Issuing Authority Bid Email):</label>
+                      <input
+                        type="email"
+                        value={recipientEmail}
+                        onChange={e => setRecipientEmail(e.target.value)}
+                        placeholder="e.g. procurement@stalbans.gov.uk"
+                        style={{ marginTop: '0.2rem', marginBottom: 0, padding: '0.5rem 0.75rem', fontSize: '0.85rem' }}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn btn-success"
+                    onClick={handleApproveAndSubmit}
+                    disabled={submitLoading || !recipientEmail || !companyProfile?.email || !proposalText}
+                    style={{ width: '100%', justifyContent: 'center' }}
+                  >
+                    {submitLoading ? <><Loader2 className="spinner" size={16} /> Dispatching...</> : <><Send size={16} /> Approve & Dispatch Proposal via Email</>}
+                  </button>
+
+                  {tender.status === 'SUBMITTED' && (
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Tender Status: Awarded?</span>
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button className="btn btn-sm" style={{ background: '#22c55e', color: '#fff' }} onClick={() => handleUpdateOutcome('WON')}>Mark Won 🏆</button>
+                        <button className="btn btn-sm" style={{ background: '#ef4444', color: '#fff' }} onClick={() => handleUpdateOutcome('LOST')}>Mark Lost ❌</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
 
+// ==========================================
+// 3. COMPANY KNOWLEDGE BASE & PROFILE
+// ==========================================
 function CompanyDocuments() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -336,6 +785,11 @@ function CompanyDocuments() {
   const [companySummary, setCompanySummary] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
+
+  // File upload state
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [selectedChunks, setSelectedChunks] = useState(null);
+  const [selectedDocTitle, setSelectedDocTitle] = useState("");
 
   const loadProfile = async () => {
     try {
@@ -371,7 +825,7 @@ function CompanyDocuments() {
     setSavingProfile(true);
     setProfileMsg("");
     try {
-      const res = await axios.post(`${API_BASE}/company/profile`, {
+      await axios.post(`${API_BASE}/company/profile`, {
         name: companyName,
         email: companyEmail,
         profile_summary: companySummary
@@ -381,6 +835,28 @@ function CompanyDocuments() {
       setProfileMsg("Failed to save profile: " + (e.response?.data?.detail || e.message));
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleUploadFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingDoc(true);
+    setMsg("");
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post(`${API_BASE}/company/documents/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setMsg(res.data.message);
+      await loadDocs();
+      await loadProfile();
+    } catch (err) {
+      setMsg("Upload failed: " + (err.response?.data?.detail || err.message));
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = null;
     }
   };
 
@@ -402,33 +878,6 @@ function CompanyDocuments() {
       setMsg("Failed: " + e.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const [uploadingDoc, setUploadingDoc] = useState(false);
-  const [selectedChunks, setSelectedChunks] = useState(null);
-  const [selectedDocTitle, setSelectedDocTitle] = useState("");
-  const [loadingChunks, setLoadingChunks] = useState(false);
-
-  const handleUploadFile = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadingDoc(true);
-    setMsg("");
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await axios.post(`${API_BASE}/company/documents/upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
-      setMsg(res.data.message);
-      await loadDocs();
-      await loadProfile();
-    } catch (err) {
-      setMsg("Upload failed: " + (err.response?.data?.detail || err.message));
-    } finally {
-      setUploadingDoc(false);
-      e.target.value = null;
     }
   };
 
@@ -459,25 +908,22 @@ function CompanyDocuments() {
   };
 
   const handleViewChunks = async (id, title) => {
-    setLoadingChunks(true);
     setSelectedDocTitle(title);
     try {
       const res = await axios.get(`${API_BASE}/company/documents/${id}/chunks`);
       setSelectedChunks(res.data);
     } catch (err) {
       alert("Failed to load chunks: " + err.message);
-    } finally {
-      setLoadingChunks(false);
     }
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1>Company Profile & Knowledge Base</h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            Register your official company identity and email for automated proposal submissions, and index capability documents for RAG matching.
+            Register your official sender identity and index real capability documents into pgvector for evidence matching.
           </p>
         </div>
         <button
@@ -514,7 +960,7 @@ function CompanyDocuments() {
             </label>
             <input
               type="email"
-              placeholder="e.g. bids@apexinnovations.com"
+              placeholder="e.g. procurement-team@apexinnovations.com"
               value={companyEmail}
               onChange={e => setCompanyEmail(e.target.value)}
               style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border)' }}
@@ -545,7 +991,7 @@ function CompanyDocuments() {
           Upload authentic company capability PDFs, certifications, or past performance statements to embed into 384-dimensional vector chunks.
         </p>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed var(--border)' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '6px', border: '1px dashed var(--border)', flexWrap: 'wrap' }}>
           <label className="btn" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', cursor: uploadingDoc ? 'not-allowed' : 'pointer' }}>
             {uploadingDoc ? <><Loader2 className="spinner" size={18} /> Parsing & Embedding...</> : <><UploadCloud size={18} /> Upload File (PDF, TXT, MD)</>}
             <input
@@ -557,7 +1003,7 @@ function CompanyDocuments() {
             />
           </label>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Directly parse PDF text via pdfplumber or upload plain text/markdown evidence.
+            Automatically parsed via pdfplumber and embedded with all-MiniLM-L6-v2 into PostgreSQL pgvector.
           </span>
         </div>
 
@@ -605,15 +1051,15 @@ function CompanyDocuments() {
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
-                        className="btn"
-                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: '#f1f5f9', color: '#334155' }}
+                        className="btn btn-sm"
+                        style={{ background: '#f1f5f9', color: '#334155' }}
                         onClick={() => handleViewChunks(d.id, d.filename)}
                       >
                         <Eye size={14} style={{ verticalAlign: 'middle' }} /> View Chunks
                       </button>
                       <button
-                        className="btn"
-                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: '#fee2e2', color: '#b91c1c' }}
+                        className="btn btn-sm"
+                        style={{ background: '#fee2e2', color: '#b91c1c' }}
                         onClick={() => handleDeleteDoc(d.id, d.filename)}
                       >
                         <Trash2 size={14} style={{ verticalAlign: 'middle' }} /> Delete
@@ -627,12 +1073,12 @@ function CompanyDocuments() {
         )}
       </div>
 
-      {/* Vector Chunks Inspector Modal/Box */}
+      {/* Vector Chunks Inspector */}
       {selectedChunks && (
         <div className="card" style={{ marginTop: '2rem', border: '2px solid var(--primary)', background: '#f8fafc' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3>Vector Chunks for: <em>{selectedDocTitle}</em> ({selectedChunks.length} chunks)</h3>
-            <button className="btn" style={{ padding: '0.2rem 0.6rem', fontSize: '0.8rem' }} onClick={() => setSelectedChunks(null)}>Close</button>
+            <button className="btn btn-sm" onClick={() => setSelectedChunks(null)}>Close</button>
           </div>
           {selectedChunks.map((c, idx) => (
             <div key={c.id} style={{ padding: '0.75rem', background: '#fff', borderRadius: '4px', border: '1px solid var(--border)', marginBottom: '0.75rem' }}>
@@ -646,433 +1092,9 @@ function CompanyDocuments() {
   );
 }
 
-function MatchReport() {
-  const [tenders, setTenders] = useState([]);
-  const [selectedTenderId, setSelectedTenderId] = useState(null);
-  const [tenderDetail, setTenderDetail] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    axios.get(`${API_BASE}/tenders/`).then(res => {
-      setTenders(res.data);
-      if (res.data.length > 0) {
-        setSelectedTenderId(res.data[0].id);
-      }
-    });
-  }, []);
-
-  const loadDetail = async (id) => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE}/tenders/${id}`);
-      setTenderDetail(res.data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedTenderId) {
-      loadDetail(selectedTenderId);
-    }
-  }, [selectedTenderId]);
-
-  const handleRunTriage = async () => {
-    if (!selectedTenderId) return;
-    setLoading(true);
-    try {
-      await axios.post(`${API_BASE}/tenders/${selectedTenderId}/triage`);
-      await loadDetail(selectedTenderId);
-    } catch (e) {
-      alert("Triage error: " + e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Semantic Match & Triage Report</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Evidence-grounded vector similarity comparison between tender requirements and company capability chunks.
-      </p>
-
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-        <label style={{ fontWeight: 600 }}>Select Tender:</label>
-        <select
-          value={selectedTenderId || ""}
-          onChange={e => setSelectedTenderId(Number(e.target.value))}
-          style={{ padding: '0.5rem 1rem', borderRadius: '0.25rem', border: '1px solid var(--border)' }}
-        >
-          {tenders.map(t => (
-            <option key={t.id} value={t.id}>{t.title} ({t.reference_id || t.id})</option>
-          ))}
-        </select>
-        <button className="btn" onClick={handleRunTriage} disabled={loading}>
-          {loading ? <Loader2 className="spinner" size={18} /> : <RefreshCw size={18} />} Run Triage Agent
-        </button>
-      </div>
-
-      {tenderDetail && (
-        <>
-          <div className="metrics-grid" style={{ marginBottom: '2rem' }}>
-            <div className="metric-card">
-              <span className="metric-label">Bid Readiness Fit Score</span>
-              <span className="metric-value" style={{ color: tenderDetail.fit_score >= 70 ? 'var(--success)' : 'var(--danger)' }}>
-                {tenderDetail.fit_score || 0}%
-              </span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">Triage Decision</span>
-              <span className="metric-value" style={{ fontSize: '1.8rem', color: tenderDetail.status === 'PROPOSAL_READY' || tenderDetail.status === 'SUBMITTED' ? 'var(--success)' : 'var(--danger)' }}>
-                {tenderDetail.status === 'PROPOSAL_READY' ? 'GO (Qualified)' : tenderDetail.status}
-              </span>
-            </div>
-          </div>
-
-          <h3>Requirement-by-Requirement Evidence Citations</h3>
-          {tenderDetail.requirements.map((req, idx) => (
-            <div key={idx} className="card" style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <h4>{req.description}</h4>
-                <span className={`status-badge ${req.status}`}>{req.status.replace("_", " ")}</span>
-              </div>
-              <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                <strong>Analysis:</strong> {req.explanation || "Evaluated by pgvector cosine search"}
-              </p>
-              {req.evidence && (
-                <div className="evidence-box" style={{ marginTop: '0.5rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.25rem' }}>
-                  <strong>Cited Company Evidence:</strong> {req.evidence}
-                </div>
-              )}
-            </div>
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
-
-function ComplianceReport() {
-  const [tenders, setTenders] = useState([]);
-  const [selected, setSelected] = useState(null);
-
-  useEffect(() => {
-    axios.get(`${API_BASE}/tenders/`).then(res => {
-      setTenders(res.data);
-      if (res.data.length > 0) {
-        axios.get(`${API_BASE}/tenders/${res.data[0].id}`).then(d => setSelected(d.data));
-      }
-    });
-  }, []);
-
-  return (
-    <div>
-      <h1>Compliance & Risk Analysis</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Automated detection of non-negotiable compliance traps and certification gaps.</p>
-
-      {selected && (
-        <div className="card">
-          <h3>Tender: {selected.title}</h3>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Issuer: {selected.organization}</p>
-          <div className="metrics-grid">
-            <div className="metric-card">
-              <span className="metric-label">Overall Fit Score</span>
-              <span className="metric-value">{selected.fit_score || 0}%</span>
-            </div>
-            <div className="metric-card">
-              <span className="metric-label">Total Requirements</span>
-              <span className="metric-value">{selected.requirements.length}</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ProposalGenerator() {
-  const [tenders, setTenders] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
-  const [proposal, setProposal] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  const loadTender = async (id) => {
-    try {
-      const res = await axios.get(`${API_BASE}/tenders/${id}`);
-      setProposal(res.data.proposal);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    axios.get(`${API_BASE}/tenders/`).then(res => {
-      setTenders(res.data);
-      if (res.data.length > 0) {
-        setSelectedId(res.data[0].id);
-        loadTender(res.data[0].id);
-      }
-    });
-  }, []);
-
-  const handleGenerate = async () => {
-    if (!selectedId) return;
-    setLoading(true);
-    setMsg("");
-    try {
-      const res = await axios.post(`${API_BASE}/tenders/${selectedId}/proposal`);
-      setMsg("Proposal generated successfully using GenAI!");
-      await loadTender(selectedId);
-    } catch (e) {
-      setMsg("Generation failed: " + e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Multi-Agent Proposal Generator</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Generates evidence-backed proposals using Gemini 1.5 with zero-hallucination ground truth citations.
-      </p>
-
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-        <label style={{ fontWeight: 600 }}>Select Tender:</label>
-        <select
-          value={selectedId || ""}
-          onChange={e => {
-            const id = Number(e.target.value);
-            setSelectedId(id);
-            loadTender(id);
-          }}
-          style={{ padding: '0.5rem 1rem', borderRadius: '0.25rem', border: '1px solid var(--border)' }}
-        >
-          {tenders.map(t => (
-            <option key={t.id} value={t.id}>{t.title}</option>
-          ))}
-        </select>
-        <button className="btn" onClick={handleGenerate} disabled={loading}>
-          {loading ? <><Loader2 className="spinner" size={18} /> Drafting via GenAI...</> : <><PenTool size={18} /> Generate Grounded Proposal</>}
-        </button>
-      </div>
-
-      {msg && <p style={{ color: 'var(--success)', fontWeight: 500, marginBottom: '1rem' }}>{msg}</p>}
-
-      {proposal ? (
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>Draft Proposal Document</h3>
-            <span className="status-badge SATISFIED">Status: {proposal.status}</span>
-          </div>
-          <textarea
-            value={proposal.full_content || ""}
-            onChange={e => setProposal({ ...proposal, full_content: e.target.value })}
-            style={{ minHeight: '400px', width: '100%', fontFamily: 'monospace', fontSize: '0.95rem', padding: '1rem' }}
-          />
-        </div>
-      ) : (
-        <div className="card" style={{ color: 'var(--text-muted)' }}>
-          No proposal drafted yet for this tender. Click "Generate Grounded Proposal" to trigger the GenAI Drafter Agent.
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ReviewApproval() {
-  const [tenders, setTenders] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
-  const [tender, setTender] = useState(null);
-  const [companyProfile, setCompanyProfile] = useState(null);
-  const [recipientEmail, setRecipientEmail] = useState("");
-  const [reviewResult, setReviewResult] = useState(null);
-  const [reviewing, setReviewing] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitMsg, setSubmitMsg] = useState("");
-
-  const loadProfile = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/company/profile`);
-      setCompanyProfile(res.data);
-    } catch (e) {
-      console.error("Failed to load company profile", e);
-    }
-  };
-
-  const loadData = async (id) => {
-    try {
-      const res = await axios.get(`${API_BASE}/tenders/${id}`);
-      setTender(res.data);
-      setRecipientEmail(res.data.issuer_email || "");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    loadProfile();
-    axios.get(`${API_BASE}/tenders/`).then(res => {
-      setTenders(res.data);
-      if (res.data.length > 0) {
-        setSelectedId(res.data[0].id);
-        loadData(res.data[0].id);
-      }
-    });
-  }, []);
-
-  const handleReview = async () => {
-    setReviewing(true);
-    setSubmitMsg("");
-    try {
-      const res = await axios.post(`${API_BASE}/tenders/${selectedId}/proposal/review`);
-      setReviewResult(res.data);
-      await loadData(selectedId);
-    } catch (e) {
-      alert("Review failed: " + (e.response?.data?.detail || e.message));
-    } finally {
-      setReviewing(false);
-    }
-  };
-
-  const handleApproveAndSubmit = async () => {
-    if (!companyProfile?.email) {
-      return alert("Please register your company email in Company Profile before submitting.");
-    }
-    if (!recipientEmail.trim()) {
-      return alert("Please provide the target organization's bid submission email.");
-    }
-
-    setSubmitting(true);
-    setSubmitMsg("");
-    try {
-      const res = await axios.post(`${API_BASE}/tenders/${selectedId}/proposal/submit`, {
-        recipient_email: recipientEmail.trim(),
-        notes: "Approved by Senior Bid Director"
-      });
-      setSubmitMsg(res.data.message);
-      await loadData(selectedId);
-    } catch (e) {
-      setSubmitMsg("Submission failed: " + (e.response?.data?.detail || e.message));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div>
-      <h1>Human-in-the-Loop Review & Approval Gate</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-        Anti-hallucination verification agent checks claims, followed by 1-click email submission to the issuing authority.
-      </p>
-
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-        <label style={{ fontWeight: 600 }}>Select Tender:</label>
-        <select
-          value={selectedId || ""}
-          onChange={e => {
-            const id = Number(e.target.value);
-            setSelectedId(id);
-            loadData(id);
-          }}
-          style={{ padding: '0.5rem 1rem', borderRadius: '0.25rem', border: '1px solid var(--border)' }}
-        >
-          {tenders.map(t => (
-            <option key={t.id} value={t.id}>{t.title}</option>
-          ))}
-        </select>
-      </div>
-
-      {tender && tender.proposal ? (
-        <>
-          <div className="card" style={{ marginBottom: '2rem' }}>
-            <h3>1. AI Anti-Hallucination Review Agent</h3>
-            <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1rem' }}>
-              Cross-examines each proposal statement against company pgvector document chunks.
-            </p>
-            <button className="btn" onClick={handleReview} disabled={reviewing}>
-              {reviewing ? <><Loader2 className="spinner" size={18} /> Auditing Evidence Claims...</> : <><ShieldCheck size={18} /> Run Fact-Checker Agent</>}
-            </button>
-
-            {reviewResult && (
-              <div style={{ marginTop: '1.5rem', padding: '1rem', background: reviewResult.passed ? '#f0fdf4' : '#fff1f2', borderLeft: `4px solid ${reviewResult.passed ? 'var(--success)' : 'var(--danger)'}`, borderRadius: '0.25rem' }}>
-                <h4>Audit Result: Score {reviewResult.review_score}/100 ({reviewResult.passed ? "PASSED" : "FLAGS DETECTED"})</h4>
-                <p style={{ marginTop: '0.5rem' }}>Recommendations: {reviewResult.recommendations.join("; ")}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="card">
-            <h3>2. Human Final Approval & Automated Dispatch</h3>
-
-            <div style={{ margin: '1.25rem 0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {/* Dynamic Sender Display */}
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-                  From (Your Registered Company):
-                </label>
-                <div style={{ padding: '0.6rem 0.8rem', background: '#f8fafc', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.9rem' }}>
-                  {companyProfile?.email ? (
-                    <span><strong>{companyProfile.name}</strong> &lt;{companyProfile.email}&gt;</span>
-                  ) : (
-                    <span style={{ color: 'var(--danger)', fontWeight: 600 }}>
-                      ⚠️ No company email registered! Go to "Company Documents" tab to register your company email.
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Dynamic Recipient Input */}
-              <div>
-                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
-                  To (Issuing Authority Bid Email):
-                </label>
-                <input
-                  type="email"
-                  value={recipientEmail}
-                  onChange={e => setRecipientEmail(e.target.value)}
-                  placeholder="Enter organization procurement email"
-                  style={{ width: '100%', padding: '0.6rem 0.8rem', borderRadius: '4px', border: '1px solid var(--border)', fontSize: '0.9rem', fontWeight: 500 }}
-                />
-                {!recipientEmail && (
-                  <span style={{ fontSize: '0.8rem', color: 'var(--danger)', marginTop: '0.25rem', display: 'block' }}>
-                    Tender notice did not provide an email. Please input the official submission email.
-                  </span>
-                )}
-              </div>
-
-              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Current Proposal Status: <strong>{tender.proposal.status}</strong>
-              </div>
-            </div>
-
-            <button
-              className="btn btn-success"
-              onClick={handleApproveAndSubmit}
-              disabled={submitting || !recipientEmail || !companyProfile?.email}
-            >
-              {submitting ? <><Loader2 className="spinner" size={18} /> Dispatching Email...</> : <><Send size={18} /> Approve & Submit Proposal via Email</>}
-            </button>
-            {submitMsg && (
-              <p style={{ color: submitMsg.includes('failed') || submitMsg.includes('error') ? 'var(--danger)' : 'var(--success)', marginTop: '1rem', fontWeight: 600 }}>
-                {submitMsg}
-              </p>
-            )}
-          </div>
-        </>
-      ) : (
-        <div className="card" style={{ color: 'var(--text-muted)' }}>
-          Please generate a proposal for this tender first before running review and approval.
-        </div>
-      )}
-    </div>
-  );
-}
-
+// ==========================================
+// MAIN APP ROUTER (CLEAN 3 VIEWS)
+// ==========================================
 function App() {
   return (
     <Router>
@@ -1080,13 +1102,19 @@ function App() {
         <Sidebar />
         <main className="main-content">
           <Routes>
+            {/* 3 Core Clean Views */}
             <Route path="/" element={<Dashboard />} />
-            <Route path="/upload" element={<TenderUpload />} />
-            <Route path="/documents" element={<CompanyDocuments />} />
-            <Route path="/matches" element={<MatchReport />} />
-            <Route path="/compliance" element={<ComplianceReport />} />
-            <Route path="/proposal" element={<ProposalGenerator />} />
-            <Route path="/review" element={<ReviewApproval />} />
+            <Route path="/workspace" element={<TenderWorkspace />} />
+            <Route path="/company" element={<CompanyDocuments />} />
+
+            {/* Seamless backward-compatibility redirects */}
+            <Route path="/upload" element={<Navigate to="/" replace />} />
+            <Route path="/matches" element={<Navigate to="/workspace" replace />} />
+            <Route path="/compliance" element={<Navigate to="/workspace" replace />} />
+            <Route path="/proposal" element={<Navigate to="/workspace" replace />} />
+            <Route path="/review" element={<Navigate to="/workspace" replace />} />
+            <Route path="/documents" element={<Navigate to="/company" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </div>
