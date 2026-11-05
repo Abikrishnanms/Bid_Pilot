@@ -1,4 +1,4 @@
-# 🚀 BidPilot — Autonomous Agentic AI Tender Intelligence & Bid Submission Platform
+#  BidPilot — Autonomous Agentic AI Tender Intelligence & Bid Submission Platform
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -19,7 +19,7 @@ Unlike standard LLM wrapper chatbots that generate generic or hallucinated propo
 
 ---
 
-## 📸 Platform Walkthrough & Screenshots
+##  Platform Walkthrough & Screenshots
 
 ### 1. Executive Dashboard & Live Pipeline
 Live tracking of discovered government notices, active pipeline value, qualification triage rates, submitted bids, and win metrics.
@@ -59,59 +59,60 @@ Generates a complete, publication-ready proposal with Executive Summary, Technic
 
 ---
 
-## 🏛️ Clean System Architecture
+##  Clean System Architecture
 
 BidPilot is built on a clean, decoupled micro-architecture where data ingestion, vector memory, autonomous reasoning agents, REST APIs, and presentation layers remain strictly isolated.
 
 ```mermaid
 flowchart TD
     subgraph INGESTION["1. Data Ingestion Layer"]
-        A1["UK Contracts Finder / OCDS API"] -->|Live JSON Feeds| B1["Feed Ingestion Service"]
-        A2["Manual RFP Upload (PDF/DOCX)"] -->|pdfplumber Parsing| B2["PDF Parser Service"]
-        A3["Company Credentials & PDFs"] -->|Chunking 500-char| B3["Vector Embedding Engine<br/>(all-MiniLM-L6-v2)"]
+        A1["UK Contracts Finder / OCDS API"] --> B1["Feed Ingestion Service"]
+        A2["Manual RFP Upload (PDF)"] --> B2["PDF Parser Service"]
+        A3["Company Documents & PDFs"] --> B3["Vector Embedding Engine (all-MiniLM-L6-v2)"]
     end
 
     subgraph STORAGE["2. Persistence & Vector Memory Layer"]
         B3 -->|384-dim Vectors| C1[("PostgreSQL 16 + pgvector")]
-        B1 -->|Metadata & Tenders| C1
-        B2 -->|Tender Requirements| C1
+        B1 -->|Metadata & Notices| C1
+        B2 -->|Extracted Text| C1
     end
 
-    subgraph AGENTS["3. Autonomous Agentic AI Core (Native Python)"]
+    subgraph AGENTS["3. Autonomous Agentic AI Core"]
         direction TB
         D1["Agent 1: Extraction Agent<br/>(Structured Pydantic Extraction)"]
-        D2["Agent 2: Semantic Matching Agent<br/>(Cosine Distance <=> Vector Retrieval)"]
-        D3["Agent 3: Triage & Fit Decision Agent<br/>(Fit Score Formula + GO/NO-GO)"]
-        D4["Agent 4: Proposal Drafting Agent<br/>(Evidence-Grounded Section Synthesis)"]
+        D2["Agent 2: Semantic Matching Agent<br/>(Vector Similarity Search)"]
+        D3["Agent 3: Triage & Fit Decision Agent<br/>(Fit Score & GO / NO-GO)"]
+        D4["Agent 4: Proposal Drafting Agent<br/>(Evidence-Grounded Synthesis)"]
         D5["Agent 5: Anti-Hallucination Fact-Checker<br/>(Adversarial Cross-Examination)"]
 
         D1 -->|Typed Requirements| D2
-        C1 <-->|Cosine Search| D2
+        D2 -->|Similarity Query| C1
+        C1 -->|Ranked Chunks| D2
         D2 -->|Compliance Matrix| D3
         D3 -->|Qualified GO Bids| D4
-        C1 -->|Ground Truth Evidence| D4
+        C1 -->|Cited Ground Truth| D4
         D4 -->|Draft Proposal| D5
-        C1 -->|Adversarial Proof| D5
+        C1 -->|Fact-Check Context| D5
     end
 
     subgraph PRESENTATION["4. API & Single-Screen UI"]
-        E1["FastAPI REST Backend<br/>(:8000)"] <--> D1
-        E1 <--> D3
-        E1 <--> D4
-        E1 <--> D5
-        F1["React 19 + Tailwind UI<br/>(Vite :5173)"] <-->|REST API| E1
+        E1["FastAPI REST Backend (:8000)"]
+        F1["React 19 + Tailwind UI (Vite :5173)"]
+        F1 -->|User Actions & Edits| E1
+        E1 -->|Pipeline Status & Data| F1
+        E1 -->|Run Multi-Agent Pipeline| D1
     end
 
     subgraph DISPATCH["5. Automated Dispatch & Staging"]
-        D5 -->|Audit Passed (Score >= 70)| G1["Automated Dispatcher"]
+        D5 -->|Audit Passed (Score 70+)| G1["Automated Dispatcher"]
         G1 -->|Live SMTP Mode| H1["Buyer Procurement Mailbox"]
-        G1 -->|Audit Staging Mode| H2["data/sent_proposals/*.eml"]
+        G1 -->|Staging Audit Mode| H2["data/sent_proposals/*.eml"]
     end
 ```
 
 ---
 
-## 🤖 The Agentic AI Core: Multi-Agent System
+##  The Agentic AI Core: Multi-Agent System
 
 BidPilot utilizes a **pure native Python asynchronous multi-agent architecture** rather than bloated orchestration frameworks (like LangChain or LangGraph). This guarantees:
 - **Sub-second latency**: Direct execution with zero framework overhead.
@@ -123,14 +124,14 @@ BidPilot utilizes a **pure native Python asynchronous multi-agent architecture**
 | Agent | Module | Primary Responsibility | Grounding Mechanism |
 | :--- | :--- | :--- | :--- |
 | **1. Extraction Agent** | [`extraction_agent.py`](backend/app/agents/extraction_agent.py) | Parses 100+ page procurement documents or OCDS JSON into structured, typed requirements (Technical, Regulatory, Eligibility, Deliverables). | Pydantic Schema enforcement with automated retry on JSON truncation. |
-| **2. Matching Agent** | [`matching_agent.py`](backend/app/agents/matching_agent.py) | Performs vector similarity search ($1 - \text{cosine distance}$) against PostgreSQL `pgvector` for each individual requirement. | Classifies as `SATISFIED`, `PARTIALLY_SATISFIED`, or `NOT_SATISFIED` citing exact text chunk IDs. |
+| **2. Matching Agent** | [`matching_agent.py`](backend/app/agents/matching_agent.py) | Performs vector similarity search (cosine distance) against PostgreSQL `pgvector` for each individual requirement. | Classifies as `SATISFIED`, `PARTIALLY_SATISFIED`, or `NOT_SATISFIED` citing exact text chunk IDs. |
 | **3. Triage Decider Agent** | [`triage_agent.py`](backend/app/agents/triage_agent.py) | Computes mathematical Bid Readiness (Fit Score), flags disqualifying blockers, and assigns commercial recommendation (`GO`, `NO_GO`, `REVIEW`). | Objective scoring formula balancing satisfied vs partially met criteria. |
 | **4. Proposal Drafting Agent** | [`proposal_agent.py`](backend/app/agents/proposal_agent.py) | Drafts a formal, multi-section procurement proposal (Executive Summary, Technical Architecture, Compliance Matrix, Timeline). | Strictly injects only verified company evidence chunks into the generation context. |
 | **5. Anti-Hallucination Reviewer** | [`review_agent.py`](backend/app/agents/review_agent.py) | Operates as an adversarial auditor cross-examining every factual assertion against company text chunks and tender scope. | Produces an audit score (0-100) and actionable findings; blocks submission if score < 70. |
 
 ---
 
-## 🧠 Generative AI & Retrieval-Augmented Generation (RAG)
+##  Generative AI & Retrieval-Augmented Generation (RAG)
 
 ### Dual-Provider LLM Gateway with Smart Fallback
 BidPilot features a resilient model gateway in [`llm_provider.py`](backend/app/services/llm_provider.py):
@@ -142,19 +143,19 @@ BidPilot features a resilient model gateway in [`llm_provider.py`](backend/app/s
 - **Embedding Model**: `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional dense vectors).
 - **Chunking Strategy**: Recursive character chunking (500 characters, 50-character overlap) preserving sentence integrity.
 - **Search Query**: Cosine distance operator (`<=>`) with normalized inner product indexing for sub-10ms similarity queries:
-  $$\text{Similarity}(q, d) = 1 - \frac{q \cdot d}{\|q\| \|d\|}$$
+  $$\text{Cosine Similarity}(q, d) = \frac{q \cdot d}{\|q\| \|d\|}$$
 
 ### Mathematical Fit Score Formula
 The Triage Agent evaluates overall bid viability using a deterministic formula:
-$$\text{Fit Score} = \left( \frac{\text{Count}(\text{SATISFIED}) + 0.5 \times \text{Count}(\text{PARTIALLY\_SATISFIED})}{\text{Total Extracted Requirements}} \right) \times 100$$
+$$\text{Fit Score} = \left( \frac{\text{Satisfied} + (0.5 \times \text{Partially Satisfied})}{\text{Total Extracted Requirements}} \right) \times 100$$
 
-- **`GO` (Qualified)**: $\text{Fit Score} \ge 70\%$ (all mandatory eligibility criteria met).
-- **`REVIEW`**: $50\% \le \text{Fit Score} < 70\%$ (acceptable match with manageable gaps).
-- **`NO_GO`**: $\text{Fit Score} < 50\%$ (insufficient evidence or missing critical certifications).
+- **`GO` (Qualified)**: Fit Score ≥ 70% (all mandatory eligibility criteria met).
+- **`REVIEW`**: 50% ≤ Fit Score < 70% (acceptable match with manageable gaps).
+- **`NO_GO`**: Fit Score < 50% (insufficient evidence or missing critical certifications).
 
 ---
 
-## 💻 Simplified 3-View User Interface
+##  Simplified 3-View User Interface
 
 The React frontend has been streamlined into a single-screen, zero-confusion workflow:
 
@@ -175,7 +176,7 @@ The React frontend has been streamlined into a single-screen, zero-confusion wor
 
 ---
 
-## 🛠️ Tech Stack & Directory Structure
+##  Tech Stack & Directory Structure
 
 ```
 Bid_Pilot/
@@ -215,7 +216,7 @@ Bid_Pilot/
 
 ---
 
-## ⚡ Quickstart Guide
+##  Quickstart Guide
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -291,7 +292,7 @@ npm run dev
 
 ---
 
-## 🔒 Automated Email Dispatch & Safety Auditing
+##  Automated Email Dispatch & Safety Auditing
 
 BidPilot supports two operational dispatch modes configured in `email_service.py`:
 
@@ -304,7 +305,7 @@ BidPilot supports two operational dispatch modes configured in `email_service.py
 
 ---
 
-## 📄 License & Attribution
+##  License & Attribution
 
 Distributed under the **MIT License**. Built for high-reliability enterprise tender operations.
 Developed with Google Gemini, PyTorch, Hugging Face Sentence Transformers, and PostgreSQL `pgvector`.
