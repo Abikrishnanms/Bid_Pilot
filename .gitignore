@@ -1,6 +1,26 @@
-__pycache__/
-*.pyc
-venv/
+# Environment variables and secrets
 .env
-frontend/node_modules/
-backend/node_modules/
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+py_env/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp/
+tmp/
