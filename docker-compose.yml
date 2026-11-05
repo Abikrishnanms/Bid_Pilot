@@ -31,6 +31,7 @@ services:
       - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-sentence-transformers}
     volumes:
       - ./data:/app/data
+      - ./backend/app:/app/app
     depends_on:
       postgres:
         condition: service_healthy

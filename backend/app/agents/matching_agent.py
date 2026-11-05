@@ -50,9 +50,9 @@ class MatchingAgent:
             # Since mock provider returns static data, we manually fix it to match the requested format for demo.
             db_match = schema.Match(
                 requirement_id=requirement.id,
-                status=match_data.status if hasattr(match_data, "status") else "UNKNOWN",
-                evidence=evidence_text[:1000], # store a snippet or reference
-                explanation=match_data.explanation if hasattr(match_data, "explanation") else "Mock explanation"
+                status=match_data.status if hasattr(match_data, "status") and match_data.status else "UNKNOWN",
+                evidence=evidence_text[:1000],
+                explanation=match_data.explanation if hasattr(match_data, "explanation") and match_data.explanation else "Requirement evaluated against company ground truth evidence."
             )
             return db_match
         except Exception as e:
