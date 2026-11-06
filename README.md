@@ -1,4 +1,4 @@
-# 🚀 BidPilot — Autonomous Agentic AI Tender Intelligence & Bid Submission Platform
+#  BidPilot — Autonomous Agentic AI Tender Intelligence & Bid Submission Platform
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Executive Summary
+##  Executive Summary
 
 **BidPilot** is an enterprise-grade autonomous **Agentic AI platform** engineered to solve the complex, high-stakes process of public sector and enterprise procurement. By combining real-time government tender feed ingestion (UK OCDS / Contracts Finder), deterministic **PostgreSQL `pgvector` Retrieval-Augmented Generation (RAG)**, and a **multi-agent reasoning pipeline**, BidPilot condenses multi-week bid qualification and proposal drafting cycles into minutes.
 
@@ -19,7 +19,7 @@ Unlike standard LLM wrapper chatbots that generate generic or hallucinated propo
 
 ---
 
-## 📸 Platform Walkthrough & Screenshots
+##  Platform Walkthrough & Screenshots
 
 ### 1. Executive Dashboard & Live Pipeline
 Live tracking of discovered government notices, active pipeline value, qualification triage rates, submitted bids, and win metrics.
@@ -48,7 +48,7 @@ Generates a complete, publication-ready proposal with Executive Summary, Technic
 ### 5. Tender Workspace — Stage 3: Anti-Hallucination Audit & 1-Click Dispatch
 
 <details open>
-<summary><b>🛡️ Adversarial Audit Guardrail (In Action)</b></summary>
+<summary><b> Adversarial Audit Guardrail (In Action)</b></summary>
 
 | Flagged Inconsistencies Caught (35/100) | Audit Passed (94/100) & 1-Click Dispatch |
 |:---:|:---:|
@@ -59,7 +59,7 @@ Generates a complete, publication-ready proposal with Executive Summary, Technic
 
 ---
 
-## 🏛️ Clean System Architecture
+##  Clean System Architecture
 
 BidPilot is built on a clean, decoupled micro-architecture where data ingestion, vector memory, autonomous reasoning agents, REST APIs, and presentation layers remain strictly isolated.
 
@@ -122,7 +122,7 @@ flowchart TD
 
 ---
 
-## 🤖 The Agentic AI Core: Multi-Agent System
+##  The Agentic AI Core: Multi-Agent System
 
 BidPilot utilizes a **pure native Python asynchronous multi-agent architecture** rather than bloated orchestration frameworks (like LangChain or LangGraph). This guarantees:
 - **Sub-second latency**: Direct execution with zero framework overhead.
@@ -141,7 +141,7 @@ BidPilot utilizes a **pure native Python asynchronous multi-agent architecture**
 
 ---
 
-## 🧠 Generative AI & Retrieval-Augmented Generation (RAG)
+##  Generative AI & Retrieval-Augmented Generation (RAG)
 
 ### Dual-Provider LLM Gateway with Smart Fallback
 BidPilot features a resilient model gateway in [`llm_provider.py`](backend/app/services/llm_provider.py):
@@ -165,7 +165,7 @@ $$\text{Fit Score} = \left( \frac{\text{Satisfied} + (0.5 \times \text{Partially
 
 ---
 
-## 💻 Simplified 3-View User Interface
+##  Simplified 3-View User Interface
 
 The React frontend has been streamlined into a single-screen, zero-confusion workflow:
 
@@ -186,7 +186,7 @@ The React frontend has been streamlined into a single-screen, zero-confusion wor
 
 ---
 
-## 🛠️ Tech Stack & Directory Structure
+##  Tech Stack & Directory Structure
 
 ```
 Bid_Pilot/
@@ -226,7 +226,7 @@ Bid_Pilot/
 
 ---
 
-## ⚡ Quickstart Guide
+##  Quickstart Guide
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -302,7 +302,7 @@ npm run dev
 
 ---
 
-## 🔒 Automated Email Dispatch & Safety Auditing
+##  Automated Email Dispatch & Safety Auditing
 
 BidPilot supports two operational dispatch modes configured in `email_service.py`:
 
@@ -315,7 +315,7 @@ BidPilot supports two operational dispatch modes configured in `email_service.py
 
 ---
 
-## 📄 License & Attribution
+##  License & Attribution
 
 Distributed under the **MIT License**. Built for high-reliability enterprise tender operations.
 Developed with Google Gemini, PyTorch, Hugging Face Sentence Transformers, and PostgreSQL `pgvector`.
