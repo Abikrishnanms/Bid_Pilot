@@ -122,7 +122,7 @@ flowchart TD
 
 ---
 
-## 🤖 The Agentic AI Core: Multi-Agent System
+##  The Agentic AI Core: Multi-Agent System
 
 BidPilot utilizes a **pure native Python asynchronous multi-agent architecture** rather than bloated orchestration frameworks (like LangChain or LangGraph). This guarantees:
 - **Low-latency execution**: Direct pipeline routing with zero framework overhead.
@@ -141,7 +141,7 @@ BidPilot utilizes a **pure native Python asynchronous multi-agent architecture**
 
 ---
 
-## 🧠 Generative AI & Hybrid RAG Architecture
+##  Generative AI & Hybrid RAG Architecture
 
 ### Resilient Gemini Gateway & Telemetry
 BidPilot features an instrumented model gateway in [`llm_provider.py`](backend/app/services/llm_provider.py):
@@ -167,7 +167,7 @@ $$\text{Fit Score} = \left( \frac{\text{Satisfied} + (0.5 \times \text{Partially
 
 ---
 
-## 📊 3-Tier AI, RAG & Agentic Evaluation Suite
+##  3-Tier AI, RAG & Agentic Evaluation Suite
 
 BidPilot includes an automated evaluation suite in [`backend/evals/`](backend/evals/) using golden ground-truth datasets ([`company_corpus.json`](backend/evals/datasets/company_corpus.json), [`rag_queries.json`](backend/evals/datasets/rag_queries.json), [`tenders_golden.json`](backend/evals/datasets/tenders_golden.json), [`hallucination_cases.json`](backend/evals/datasets/hallucination_cases.json)) and `pytest`:
 
@@ -217,7 +217,7 @@ docker compose exec -e LLM_TIMEOUT_SECONDS=10 backend python -m evals.run_all --
 
 ---
 
-## 💻 Simplified 3-View User Interface
+##  Simplified 3-View User Interface
 
 The React frontend has been streamlined into a single-screen, zero-confusion workflow:
 
@@ -238,7 +238,7 @@ The React frontend has been streamlined into a single-screen, zero-confusion wor
 
 ---
 
-## 🛠️ Tech Stack & Directory Structure
+##  Tech Stack & Directory Structure
 
 ```
 Bid_Pilot/
@@ -289,7 +289,7 @@ Bid_Pilot/
 
 ---
 
-## ⚡ Quickstart Guide
+##  Quickstart Guide
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -372,7 +372,7 @@ npm run dev
 
 ---
 
-## 🔒 Automated Email Dispatch & Safety Auditing
+##  Automated Email Dispatch & Safety Auditing
 
 BidPilot supports two operational dispatch modes configured in `email_service.py`:
 
@@ -385,7 +385,7 @@ BidPilot supports two operational dispatch modes configured in `email_service.py
 
 ---
 
-## 📄 License & Attribution
+##  License & Attribution
 
 Distributed under the **MIT License**. Built for high-reliability enterprise tender operations.
 Developed with Google Gemini, PyTorch, Hugging Face Sentence Transformers, and PostgreSQL `pgvector`.
