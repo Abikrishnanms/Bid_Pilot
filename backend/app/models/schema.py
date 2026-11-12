@@ -53,6 +53,7 @@ class DocumentChunk(Base):
     __tablename__ = "document_chunks"
     id = Column(Integer, primary_key=True, index=True)
     document_id = Column(Integer, ForeignKey("documents.id"))
+    chunk_index = Column(Integer, nullable=True)
     text_content = Column(Text)
     embedding = Column(Vector(384)) # Using 384 dimensions as per PRD
     
@@ -63,6 +64,7 @@ class Match(Base):
     id = Column(Integer, primary_key=True, index=True)
     requirement_id = Column(Integer, ForeignKey("requirements.id"))
     status = Column(String) # SATISFIED, NOT_SATISFIED, PARTIALLY_SATISFIED, UNKNOWN
+    top_similarity = Column(Float, nullable=True)
     evidence = Column(Text)
     explanation = Column(Text)
     

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "pos_iso27001",
+    "category": "certification",
+    "answerable": true,
+    "query": "Must hold active ISO 27001:2022 Information Security Management certification.",
+    "expected_sources": ["02_Security_Certifications.txt", "01_Corporate_Overview.txt"],
+    "expected_substrings": ["ISO 27001:2022", "IS-882910"]
+  },
+  {
+    "id": "pos_soc2",
+    "category": "certification",
+    "answerable": true,
+    "query": "Active SOC 2 Type II security attestation and UK Cyber Essentials Plus accreditation.",
+    "expected_sources": ["02_Security_Certifications.txt"],
+    "expected_substrings": ["SOC 2 Type II", "Cyber Essentials Plus"]
+  },
+  {
+    "id": "pos_fedramp_mod",
+    "category": "certification",
+    "answerable": true,
+    "query": "Demonstrated FedRAMP Moderate readiness for public-sector cloud deployments.",
+    "expected_sources": ["02_Security_Certifications.txt"],
+    "expected_substrings": ["FedRAMP Moderate"]
+  },
+  {
+    "id": "pos_fastapi",
+    "category": "technical",
+    "answerable": true,
+    "query": "Modern microservices backend engineered using Python FastAPI and Pydantic v2 validation.",
+    "expected_sources": ["03_Technical_Architecture.txt"],
+    "expected_substrings": ["FastAPI", "Pydantic v2"]
+  },
+  {
+    "id": "pos_pgvector",
+    "category": "technical",
+    "answerable": true,
+    "query": "Database storage with PostgreSQL 16 pgvector HNSW cosine similarity search and RAG support.",
+    "expected_sources": ["03_Technical_Architecture.txt", "04_Healthcare_Case_Study.txt"],
+    "expected_substrings": ["pgvector", "HNSW"]
+  },
+  {
+    "id": "pos_react_k8s",
+    "category": "technical",
+    "answerable": true,
+    "query": "React 19 frontend interface containerized via Docker and deployed on AWS EKS Kubernetes with Terraform.",
+    "expected_sources": ["03_Technical_Architecture.txt", "05_Cloud_Migration_Case_Study.txt"],
+    "expected_substrings": ["React 19", "Kubernetes", "Terraform"]
+  },
+  {
+    "id": "pos_headcount",
+    "category": "eligibility",
+    "answerable": true,
+    "query": "Vendor must maintain an engineering workforce of at least 50 full-time technical staff and 10+ years experience.",
+    "expected_sources": ["01_Corporate_Overview.txt"],
+    "expected_substrings": ["64 full-time", "12 years"]
+  },
+  {
+    "id": "pos_sla",
+    "category": "technical",
+    "answerable": true,
+    "query": "24/7 Tier-3 site reliability engineering support with 99.9% or higher production SLA.",
+    "expected_sources": ["01_Corporate_Overview.txt", "05_Cloud_Migration_Case_Study.txt"],
+    "expected_substrings": ["99.95%", "Tier-3"]
+  },
+  {
+    "id": "pos_healthcare_case",
+    "category": "past_performance",
+    "answerable": true,
+    "query": "Proven past performance delivering an enterprise clinical or healthcare RAG vector knowledge platform.",
+    "expected_sources": ["04_Healthcare_Case_Study.txt"],
+    "expected_substrings": ["National Health Data Authority", "450,000 clinical"]
+  },
+  {
+    "id": "pos_cloud_migration",
+    "category": "past_performance",
+    "answerable": true,
+    "query": "Track record migrating legacy public-sector monoliths to containerized cloud microservices.",
+    "expected_sources": ["05_Cloud_Migration_Case_Study.txt"],
+    "expected_substrings": ["GovDigital", "38 legacy monolithic"]
+  },
+  {
+    "id": "neg_civil_works",
+    "category": "negative_out_of_domain",
+    "answerable": false,
+    "query": "Licensed structural civil engineering contractor for heritage stonework, bridge masonry, and park visitor footpath paving.",
+    "expected_sources": [],
+    "expected_substrings": []
+  },
+  {
+    "id": "neg_sap_payroll",
+    "category": "negative_out_of_domain",
+    "answerable": false,
+    "query": "Certified SAP S/4HANA municipal payroll ERP implementation partner with 100 SAP ABAP consultants.",
+    "expected_sources": [],
+    "expected_substrings": []
+  },
+  {
+    "id": "neg_marine_welding",
+    "category": "negative_out_of_domain",
+    "answerable": false,
+    "query": "Commercial offshore subsea hyperbaric welding certification and maritime hull repair fleet.",
+    "expected_sources": [],
+    "expected_substrings": []
+  },
+  {
+    "id": "neg_nuclear_hvac",
+    "category": "negative_out_of_domain",
+    "answerable": false,
+    "query": "ASME NQA-1 certified nuclear reactor cooling tower mechanical piping and industrial HVAC maintenance.",
+    "expected_sources": [],
+    "expected_substrings": []
+  }
+]
+

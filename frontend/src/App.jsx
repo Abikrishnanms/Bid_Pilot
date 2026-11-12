@@ -393,7 +393,7 @@ function TenderWorkspace() {
     setTriageLoading(true);
     setMsg("");
     try {
-      await axios.post(`${API_BASE}/tenders/${selectedTenderId}/triage`);
+      await axios.post(`${API_BASE}/tenders/${selectedTenderId}/triage?force_refresh=true`);
       setMsg("AI Qualification & Evidence Matching complete!");
       await loadTenderDetail(selectedTenderId);
     } catch (e) {
@@ -604,7 +604,14 @@ function TenderWorkspace() {
                   <div key={idx} className="card" style={{ marginBottom: '1rem', borderLeft: `4px solid ${req.status === 'SATISFIED' ? 'var(--success)' : req.status === 'PARTIALLY_SATISFIED' ? 'var(--warning)' : 'var(--danger)'}` }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
                       <h4 style={{ fontSize: '1rem' }}>{req.description}</h4>
-                      <span className={`status-badge ${req.status}`}>{req.status.replace("_", " ")}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                        {req.top_similarity !== null && req.top_similarity !== undefined && (
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: '#f1f5f9', padding: '0.2rem 0.45rem', borderRadius: '4px' }}>
+                            RAG Sim: {Math.round(req.top_similarity * 100)}%
+                          </span>
+                        )}
+                        <span className={`status-badge ${req.status}`}>{req.status.replace("_", " ")}</span>
+                      </div>
                     </div>
                     <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
                       <strong>AI Analysis:</strong> {req.explanation || "Evaluated by pgvector cosine search against company ground truth"}

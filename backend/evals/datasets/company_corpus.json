@@ -1,0 +1,34 @@
+[
+  {
+    "filename": "01_Corporate_Overview.txt",
+    "content": "Apex Innovations Technologies is an enterprise software engineering and cloud transformation firm headquartered in Reston, Virginia, with a regional delivery center in London, United Kingdom. Founded 12 years ago, the company employs 64 full-time cleared engineers, cloud architects, and data scientists across its North American and European offices.\n\nOur annual audited revenue is $18.4 million USD with zero debt and full commercial general liability coverage up to $5 million. Official procurement correspondence and formal bid submissions are managed exclusively by our Bid Management Office at bids@apexinnovations.com.\n\nEvery engagement follows our documented Agile DevSecOps Governance Playbook, backed by 24/7 Tier-3 site reliability engineering (SRE) escalation with a guaranteed 99.95% production uptime SLA. Please verify our active compliance credentials carefully before committing to regulated tenders: ISO 27001:2022 Certificate #IS-882910 and SOC 2 Type II audit report #SOC-44102 remain valid through December 2027."
+  },
+  {
+    "filename": "01b_Delivery_Governance.txt",
+    "content": "Our Project Management Office adheres to PMBOK and PRINCE2 governance frameworks with bi-weekly sprint demonstrations, automated risk registers, and executive steering committee briefings.\n\nEvery production deployment undergoes peer code review, static application security testing (SAST), software composition analysis (SCA), and automated load validation prior to client sign-off.\n\nDedicated customer onboarding includes role-based training workshops, administrator runbooks, architectural decision records (ADRs), and 90-day hypercare stabilization transitions."
+  },
+  {
+    "filename": "02_Security_Certifications.txt",
+    "content": "Apex Innovations maintains rigorous external compliance audits across all software delivery and hosted SaaS environments. Our Information Security Management System holds active ISO 27001:2022 certification (Certificate #IS-882910, scope: cloud platform engineering and AI analytics) and ISO 9001:2015 Quality Management certification (#QMS-77410).\n\nFor North American and UK public-sector clients, we hold an active SOC 2 Type II attestation with zero exceptions and UK Cyber Essentials Plus accreditation (#CEP-2026-091). Our multi-tenant GovCloud reference architecture has achieved FedRAMP Moderate readiness assessment via an accredited 3PAO.\n\nNote on compliance roadmap: Apex Innovations does NOT currently hold FedRAMP High authorization, HIPAA Business Associate Agreement (BAA) certification, or ISO 27701 privacy extension (planned for Q4 2027)."
+  },
+  {
+    "filename": "02b_Data_Protection_Addendum.txt",
+    "content": "All hosted platforms enforce least-privilege RBAC access controls, hardware-backed KMS key rotation every 90 days, immutable CloudTrail audit logs retained for 7 years, and GDPR-compliant data residency pinning within US-East or UK-London regions.\n\nVulnerability management processes require critical CVE remediation within 24 hours, high findings within 7 days, and semi-annual third-party CREST-accredited penetration testing.\n\nIncident response teams maintain a 15-minute P1 acknowledgment SLA with automated PagerDuty escalation and disaster recovery RPO under 5 minutes and RTO under 30 minutes."
+  },
+  {
+    "filename": "03_Technical_Architecture.txt",
+    "content": "Our core backend engineering practice builds containerized microservices using Python 3.11 and FastAPI with strict Pydantic v2 schema validation, asynchronous SQLAlchemy ORM, and automated OpenAPI telemetry.\n\nFor enterprise Retrieval-Augmented Generation (RAG) and semantic search workloads, we standardize on PostgreSQL 16 with the pgvector extension using HNSW cosine indexes and hybrid full-text RRF fusion. Document pipelines leverage pdfplumber text extraction and HuggingFace Sentence Transformers (all-MiniLM-L6-v2 384-dimensional dense embeddings).\n\nFrontend command centers are engineered with React 19, Vite, and Tailwind CSS, containerized using multi-stage Docker builds, and deployed on AWS EKS Kubernetes clusters provisioned via Terraform Infrastructure-as-Code with zero-downtime blue/green releases."
+  },
+  {
+    "filename": "03b_Observability_SRE_Stack.txt",
+    "content": "Production observability integrates OpenTelemetry distributed tracing, Prometheus metrics scraping, Grafana SLA dashboards, and centralized structured JSON log aggregation.\n\nAutomated synthetic health checks verify API endpoints every 30 seconds across multi-AZ load balancers with automatic horizontal pod autoscaling based on queue depth and CPU utilization.\n\nDatabase backups run continuously via point-in-time recovery (PITR) snapshots replicated cross-region with automated weekly restore verification drills."
+  },
+  {
+    "filename": "04_Healthcare_Case_Study.txt",
+    "content": "Case Study A — National Health Data Authority (NHDA) Clinical Knowledge Platform (2024-2025, Contract Value: $1,400,000 USD). Apex Innovations designed and deployed a secure Retrieval-Augmented Generation knowledge engine indexing 450,000 clinical guidelines and medical policy PDFs into PostgreSQL pgvector.\n\nKey Verified Outcomes: Achieved sub-25ms P95 vector query latency using HNSW indexing, reduced clinician policy lookup time by 71%, and passed external penetration testing with zero critical or high vulnerabilities. All data remained encrypted at rest with AES-256 and in transit via TLS 1.3.\n\nClient Reference Contact: Dr. Marcus Vance, Director of Clinical Informatics. All deliverables were completed 3 weeks ahead of schedule and $45,000 under fixed-price budget."
+  },
+  {
+    "filename": "05_Cloud_Migration_Case_Study.txt",
+    "content": "Case Study B — GovDigital Public Services Cloud Modernization (2023-2024, Contract Value: $2,100,000 USD). Apex Innovations led the full cloud migration of 38 legacy monolithic public-sector portals onto AWS EKS containerized microservices using FastAPI, Docker, and GitHub Actions CI/CD.\n\nKey Verified Outcomes: Reduced P95 API response latency by 62%, lowered annual cloud compute expenditure by $340,000 USD via autoscaling policies, and achieved 99.98% measured production availability over 18 consecutive months.\n\nDeliverables included an Enterprise Cloud Migration Blueprint, automated Terraform modules, full SRE runbooks, and hands-on knowledge transfer workshops for 28 agency engineers."
+  }
+]
