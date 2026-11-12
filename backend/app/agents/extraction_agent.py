@@ -6,9 +6,9 @@ from ..schemas.tender import ExtractedRequirements
 logger = logging.getLogger(__name__)
 
 class ExtractionAgent:
-    def __init__(self):
-        self.pdf_parser = PDFParser()
-        self.llm_provider = get_llm_provider()
+    def __init__(self, llm_provider=None, pdf_parser=None):
+        self.pdf_parser = pdf_parser or PDFParser()
+        self.llm_provider = llm_provider or get_llm_provider()
 
     def process_text(self, raw_text: str) -> ExtractedRequirements:
         """

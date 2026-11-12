@@ -5,17 +5,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 class EmbeddingService:
+    _model_cache = {}
+
     def __init__(self):
         # We use a fast, lightweight model suitable for 384 dimensions by default
         # all-MiniLM-L6-v2 outputs 384 dimensional vectors
-        model_name = os.getenv("EMBEDDING_PROVIDER", "all-MiniLM-L6-v2")
+        model_name = os.getenv("EMBEDDING_MODEL") or os.getenv("EMBEDDING_PROVIDER", "all-MiniLM-L6-v2")
         
         # In a real microservice, we'd wrap this with Mock logic if needed
         if model_name == "sentence-transformers":
             model_name = "all-MiniLM-L6-v2"
-            
-        logger.info(f"Loading embedding model: {model_name}")
-        self.model = SentenceTransformer(model_name)
+
+        if model_name not in self._model_cache:
+            logger.info(f"Loading embedding model: {model_name}")
+            self._model_cache[model_name] = SentenceTransformer(model_name)
+        self.model = self._model_cache[model_name]
 
     def get_embedding(self, text: str) -> list[float]:
         """

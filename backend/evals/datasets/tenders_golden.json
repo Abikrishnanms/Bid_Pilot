@@ -1,0 +1,99 @@
+[
+  {
+    "id": "tender_go_ai_platform",
+    "title": "Public Sector AI Knowledge & Microservices Modernization Platform",
+    "organization": "Department of Digital Transformation",
+    "deadline": "2026-12-15",
+    "estimated_value": "$1,500,000 USD",
+    "location": "Washington D.C. / Hybrid",
+    "raw_rfp_text": "Solicitation Ref: DDT-2026-AI-01\nTitle: Public Sector AI Knowledge & Microservices Modernization Platform\nIssuing Organization: Department of Digital Transformation\nEstimated Budget: $1,500,000 USD\nSubmission Deadline: 2026-12-15\nLocation: Washington D.C. / Hybrid\n\nEligibility Requirements:\n1. Vendor must demonstrate at least 10 years of enterprise cloud engineering experience.\n2. Vendor must maintain at least 50 full-time engineering personnel.\n\nTechnical Requirements:\n1. Backend API must be built with Python FastAPI microservices and Pydantic validation.\n2. Storage layer must implement PostgreSQL 16 with pgvector semantic search and HNSW indexing.\n3. Frontend portal built in React with containerized Docker and Kubernetes deployment.\n\nRequired Certifications:\n1. Active ISO 27001:2022 Information Security Management certification.\n2. Active SOC 2 Type II attestation.\n\nDeliverables:\n1. Production RAG microservice codebase and Terraform IaC modules.\n2. 24/7 Tier-3 SRE support documentation with 99.9% uptime SLA.\n\nEvaluation Criteria:\n- Technical Architecture (60%)\n- Past Performance (25%)\n- Price (15%)",
+    "expected_requirements": [
+      "10 years of enterprise cloud engineering experience",
+      "50 full-time engineering personnel",
+      "Python FastAPI microservices and Pydantic validation",
+      "PostgreSQL 16 with pgvector semantic search and HNSW indexing",
+      "React frontend with Docker and Kubernetes deployment",
+      "ISO 27001:2022 certification",
+      "SOC 2 Type II attestation"
+    ],
+    "requirements_labeled": [
+      {"type": "eligibility", "description": "Vendor must have at least 10 years of documented cloud engineering experience and 50+ full-time staff.", "expected_status": "SATISFIED"},
+      {"type": "technical", "description": "Microservices backend engineered using Python FastAPI with Pydantic v2 validation.", "expected_status": "SATISFIED"},
+      {"type": "technical", "description": "PostgreSQL 16 database with pgvector HNSW cosine similarity search for RAG.", "expected_status": "SATISFIED"},
+      {"type": "certification", "description": "Active ISO 27001:2022 and SOC 2 Type II certifications.", "expected_status": "SATISFIED"}
+    ],
+    "expected_fit_score": 100.0,
+    "expected_decision": "GO",
+    "expected_hard_blockers": []
+  },
+  {
+    "id": "tender_review_partial",
+    "title": "Regional Health Cloud Portal with Multilingual Support",
+    "organization": "Midlands Health Authority",
+    "deadline": "2026-12-20",
+    "estimated_value": "GBP 450,000",
+    "location": "Birmingham, UK",
+    "raw_rfp_text": "Solicitation Ref: MHA-2026-08\nTitle: Regional Health Cloud Portal with Multilingual Support\nIssuing Organization: Midlands Health Authority\nEstimated Budget: GBP 450,000\nSubmission Deadline: 2026-12-20\nLocation: Birmingham, UK\n\nTechnical Requirements:\n1. Containerized Python FastAPI microservices hosted on AWS EKS Kubernetes.\n2. Semantic search using PostgreSQL pgvector.\n3. Dedicated bilingual Welsh/English call-center helpdesk staffed locally in Cardiff.\n4. Bi-weekly in-person operational governance workshops in Cardiff.\n\nRequired Certifications:\n1. UK Cyber Essentials Plus accreditation.",
+    "expected_requirements": [
+      "Python FastAPI microservices on AWS EKS Kubernetes",
+      "Semantic search using PostgreSQL pgvector",
+      "Dedicated bilingual Welsh/English call-center helpdesk staffed locally in Cardiff",
+      "Bi-weekly in-person operational governance workshops in Cardiff",
+      "UK Cyber Essentials Plus accreditation"
+    ],
+    "requirements_labeled": [
+      {"type": "technical", "description": "Containerized Python FastAPI microservices hosted on AWS EKS Kubernetes.", "expected_status": "SATISFIED"},
+      {"type": "technical", "description": "Semantic search using PostgreSQL pgvector.", "expected_status": "SATISFIED"},
+      {"type": "certification", "description": "UK Cyber Essentials Plus accreditation.", "expected_status": "SATISFIED"},
+      {"type": "technical", "description": "Dedicated bilingual Welsh/English call-center helpdesk staffed locally in Cardiff.", "expected_status": "NOT_SATISFIED"},
+      {"type": "eligibility", "description": "Bi-weekly in-person operational governance workshops in Cardiff.", "expected_status": "NOT_SATISFIED"}
+    ],
+    "expected_fit_score": 60.0,
+    "expected_decision": "REVIEW",
+    "expected_hard_blockers": []
+  },
+  {
+    "id": "tender_nogo_missing_cert",
+    "title": "Classified Defense High-Assurance Hosting & Payroll ERP",
+    "organization": "Defense Logistics Directorate",
+    "deadline": "2026-11-28",
+    "estimated_value": "$8,200,000 USD",
+    "location": "Reston, VA",
+    "raw_rfp_text": "Solicitation Ref: DLD-2026-99\nTitle: Classified Defense High-Assurance Hosting & Payroll ERP\nIssuing Organization: Defense Logistics Directorate\nEstimated Budget: $8,200,000 USD\nSubmission Deadline: 2026-11-28\nLocation: Reston, VA\n\nMandatory Eligibility & Certifications:\n1. Mandatory active FedRAMP High Authorization to Operate (ATO) at time of bid.\n2. Mandatory certified SAP S/4HANA payroll integration practice.\n3. Active HIPAA Business Associate Agreement (BAA) and ISO 27701 privacy certification.\n\nTechnical Requirements:\n1. Containerized cloud deployment via Kubernetes.",
+    "expected_requirements": [
+      "Active FedRAMP High Authorization to Operate",
+      "Certified SAP S/4HANA payroll integration practice",
+      "Active HIPAA BAA and ISO 27701 privacy certification",
+      "Containerized cloud deployment via Kubernetes"
+    ],
+    "requirements_labeled": [
+      {"type": "certification", "description": "Mandatory active FedRAMP High Authorization to Operate (ATO) at time of bid.", "expected_status": "NOT_SATISFIED"},
+      {"type": "eligibility", "description": "Mandatory certified SAP S/4HANA municipal payroll integration practice.", "expected_status": "NOT_SATISFIED"},
+      {"type": "certification", "description": "Active HIPAA Business Associate Agreement (BAA) and ISO 27701 privacy certification.", "expected_status": "NOT_SATISFIED"},
+      {"type": "technical", "description": "Containerized cloud deployment via Kubernetes.", "expected_status": "SATISFIED"}
+    ],
+    "expected_fit_score": 25.0,
+    "expected_decision": "NO_GO",
+    "expected_hard_blockers": ["FedRAMP High Authorization", "SAP S/4HANA"]
+  },
+  {
+    "id": "tender_nogo_domain_mismatch",
+    "title": "National Trust - NI - Lead Designer & Multidisciplinary Team for Capital Works Visitor Infrastructure Project",
+    "organization": "THE NATIONAL TRUST FOR PLACES OF HISTORIC INTEREST OR NATURAL BEAUTY",
+    "deadline": "2026-12-02",
+    "estimated_value": "GBP 40,000.00",
+    "location": "Northern Ireland, UK",
+    "raw_rfp_text": "Title: National Trust - NI - Lead Designer & Multidisciplinary Team for Capital Works Visitor Infrastructure Project\nIssuing Authority: THE NATIONAL TRUST FOR PLACES OF HISTORIC INTEREST OR NATURAL BEAUTY\nBudget: GBP 40,000.00\n\nScope & Requirements:\n1. RIBA Chartered Architect / Lead Structural Civil Engineer for heritage site capital works.\n2. Environmental planning, footpath resurfacing, stone bridge masonry restoration, and visitor car park civil engineering.",
+    "expected_requirements": [
+      "RIBA Chartered Architect or Lead Structural Civil Engineer for heritage capital works",
+      "Footpath resurfacing, stone bridge masonry restoration, and visitor car park civil engineering"
+    ],
+    "requirements_labeled": [
+      {"type": "eligibility", "description": "RIBA Chartered Architect and structural civil engineer for heritage site capital works.", "expected_status": "NOT_SATISFIED"},
+      {"type": "technical", "description": "Physical footpath resurfacing, stone bridge masonry restoration, and visitor car park construction.", "expected_status": "NOT_SATISFIED"}
+    ],
+    "expected_fit_score": 0.0,
+    "expected_decision": "NO_GO",
+    "expected_hard_blockers": ["Civil engineering and architectural construction domain mismatch"]
+  }
+]

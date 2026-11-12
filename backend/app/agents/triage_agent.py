@@ -10,16 +10,24 @@ from ..schemas.tender import TriageResult, StrategicTriageAnalysis
 logger = logging.getLogger(__name__)
 
 class TriageAgent:
-    def __init__(self):
-        self.matching_agent = MatchingAgent()
-        self.llm_provider = get_llm_provider()
+    def __init__(
+        self,
+        matching_agent: MatchingAgent = None,
+        llm_provider=None,
+        proposal_agent=None,
+        auto_draft: bool = True,
+    ):
+        self.llm_provider = llm_provider or get_llm_provider()
+        self.matching_agent = matching_agent or MatchingAgent(llm_provider=self.llm_provider)
+        self.proposal_agent = proposal_agent
+        self.auto_draft = auto_draft
         # Dynamic configurable thresholds (can be customized via .env or settings)
         self.go_threshold = float(os.getenv("TRIAGE_GO_THRESHOLD", "70.0"))
         self.review_threshold = float(os.getenv("TRIAGE_REVIEW_THRESHOLD", "50.0"))
 
-    def evaluate_tender(self, tender_id: int, db: Session) -> TriageResult:
+    def evaluate_tender(self, tender_id: int, db: Session, force_refresh: bool = False) -> TriageResult:
         """
-        Evaluates all requirements using pgvector RAG, calculates overall Fit Score,
+        Evaluates all requirements using Hybrid RAG, calculates overall Fit Score,
         uses GenAI strategic reasoning to detect true fatal blockers vs manageable risks,
         and renders an autonomous GO / NO-GO / REVIEW decision.
         """
@@ -49,11 +57,17 @@ class TriageAgent:
                 gap_count=0
             )
 
+        if force_refresh:
+            req_ids = [req.id for req in tender.requirements]
+            if req_ids:
+                db.query(schema.Match).filter(schema.Match.requirement_id.in_(req_ids)).delete(synchronize_session=False)
+                db.commit()
+
         # 1. Match each requirement against company vector knowledge base
         for req in tender.requirements:
             match = db.query(schema.Match).filter(schema.Match.requirement_id == req.id).first()
             if not match:
-                match = self.matching_agent.evaluate_requirement(req, db)
+                match = self.matching_agent.evaluate_requirement(req, db, tender=tender)
                 db.add(match)
                 db.commit()
                 db.refresh(match)
@@ -116,6 +130,8 @@ class TriageAgent:
                 hard_blockers = analysis.fatal_blockers or []
                 rationale = analysis.strategic_rationale or f"Qualification match evaluated at {fit_score}%."
             except Exception as e:
+                if getattr(self.llm_provider, "strict_mode", False):
+                    raise
                 logger.warning(f"GenAI Strategic Triage analysis fell back: {e}")
                 hard_blockers = []
                 rationale = f"Evaluated qualification fit at {fit_score}%. {gap_count} gaps identified for review."
@@ -129,13 +145,16 @@ class TriageAgent:
             tender.status = "PROPOSAL_READY"
             
             # Automatically draft proposal for GO-qualified tenders
-            try:
-                from ..agents.proposal_agent import ProposalAgent
-                proposal_agent = ProposalAgent()
-                proposal_agent.generate_proposal(tender_id, db)
-                logger.info(f"Automatically drafted proposal for GO-qualified tender {tender_id}.")
-            except Exception as e:
-                logger.warning(f"Failed to auto-draft proposal during triage: {e}")
+            if self.auto_draft:
+                try:
+                    from ..agents.proposal_agent import ProposalAgent
+                    proposal_agent = self.proposal_agent or ProposalAgent(llm_provider=self.llm_provider)
+                    proposal_agent.generate_proposal(tender_id, db)
+                    logger.info(f"Automatically drafted proposal for GO-qualified tender {tender_id}.")
+                except Exception as e:
+                    if getattr(self.llm_provider, "strict_mode", False):
+                        raise
+                    logger.warning(f"Failed to auto-draft proposal during triage: {e}")
 
         elif fit_score >= self.review_threshold and len(hard_blockers) == 0:
             decision = "REVIEW"

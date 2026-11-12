@@ -66,6 +66,7 @@ def get_tender_detail(tender_id: int, db: Session = Depends(get_db)):
             "type": req.req_type,
             "description": req.description,
             "status": match.status if match else "PENDING",
+            "top_similarity": match.top_similarity if match else None,
             "evidence": match.evidence if match else None,
             "explanation": match.explanation if match else None
         })
@@ -113,9 +114,9 @@ def fetch_new_tenders(db: Session = Depends(get_db)):
     }
 
 @router.post("/{tender_id}/triage", response_model=TriageResult)
-def triage_tender(tender_id: int, db: Session = Depends(get_db)):
+def triage_tender(tender_id: int, force_refresh: bool = False, db: Session = Depends(get_db)):
     """Runs autonomous Go / No-Go qualification evaluation."""
-    return triage_agent.evaluate_tender(tender_id, db)
+    return triage_agent.evaluate_tender(tender_id, db, force_refresh=force_refresh)
 
 @router.post("/{tender_id}/proposal")
 def generate_tender_proposal(tender_id: int, db: Session = Depends(get_db)):
@@ -340,7 +341,7 @@ def match_tender_requirements(tender_id: int, db: Session = Depends(get_db)):
             results.append(existing_match)
             continue
             
-        match_res = matching_agent.evaluate_requirement(req, db)
+        match_res = matching_agent.evaluate_requirement(req, db, tender=tender)
         db.add(match_res)
         db.commit()
         db.refresh(match_res)

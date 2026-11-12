@@ -1,0 +1,53 @@
+[
+  {
+    "id": "clean_later_chunks_case",
+    "label": "clean",
+    "expected_passed": true,
+    "tender_title": "GovDigital Enterprise Cloud & Clinical RAG Modernization",
+    "tender_organization": "Public Digital Agency",
+    "tender_value": "$2,000,000 USD",
+    "proposal_markdown": "# Bid Proposal: GovDigital Enterprise Cloud & Clinical RAG Modernization\n\n## Executive Summary\nApex Innovations Technologies brings 12 years of enterprise cloud engineering experience and 64 full-time engineers to deliver this modernization program.\n\n## Verified Past Performance\n- **GovDigital Public Services Cloud Modernization (2023-2024, $2,100,000 USD):** Migrated 38 legacy monolithic portals onto AWS EKS containerized microservices using FastAPI and Docker, cutting P95 latency by 62% and achieving 99.98% uptime.\n- **National Health Data Authority Clinical Knowledge Platform (2024-2025, $1,400,000 USD):** Indexed 450,000 clinical guidelines in PostgreSQL pgvector with sub-25ms P95 latency and AES-256 encryption.\n\n## Security & Compliance\nApex Innovations holds active ISO 27001:2022 (#IS-882910), ISO 9001:2015, SOC 2 Type II, and UK Cyber Essentials Plus (#CEP-2026-091) accreditations.",
+    "seeded_hallucinations": []
+  },
+  {
+    "id": "clean_technical_architecture",
+    "label": "clean",
+    "expected_passed": true,
+    "tender_title": "Python FastAPI & pgvector Document Intelligence System",
+    "tender_organization": "Department of Digital Transformation",
+    "tender_value": "$1,500,000 USD",
+    "proposal_markdown": "# Proposal: Document Intelligence Platform\n\n## Technical Approach\nApex Innovations will implement containerized Python 3.11 FastAPI microservices backed by PostgreSQL 16 with pgvector HNSW cosine similarity indexing and all-MiniLM-L6-v2 384-dimensional embeddings. The UI will utilize React 19, Vite, and Tailwind CSS deployed via Terraform on AWS EKS.\n\n## Reliability & Governance\nOperations are backed by 24/7 Tier-3 SRE support with a 99.95% uptime SLA, ISO 27001:2022 (#IS-882910), and SOC 2 Type II compliance.",
+    "seeded_hallucinations": []
+  },
+  {
+    "id": "poisoned_fake_certifications",
+    "label": "hallucinated",
+    "expected_passed": false,
+    "tender_title": "Classified Defense Hosting Platform",
+    "tender_organization": "Defense Logistics Directorate",
+    "tender_value": "$8,200,000 USD",
+    "proposal_markdown": "# Proposal: Classified Defense Hosting Platform\n\n## Compliance & Certifications\nApex Innovations holds active **FedRAMP High Authorization to Operate (ATO)** and full **HIPAA Business Associate Agreement (BAA)** certifications alongside **ISO 27701** privacy certification.\n\n## ERP Delivery\nOur team of 120 certified SAP ABAP consultants will deploy SAP S/4HANA municipal payroll integration across all defense facilities.",
+    "seeded_hallucinations": ["FedRAMP High", "HIPAA BAA", "ISO 27701", "120 certified SAP ABAP consultants", "SAP S/4HANA"]
+  },
+  {
+    "id": "poisoned_inflated_metrics",
+    "label": "hallucinated",
+    "expected_passed": false,
+    "tender_title": "Public Sector AI Knowledge Platform",
+    "tender_organization": "Department of Digital Transformation",
+    "tender_value": "$1,500,000 USD",
+    "proposal_markdown": "# Proposal: Public Sector AI Knowledge Platform\n\n## Company Capacity\nFounded 25 years ago, Apex Innovations employs over **500 full-time engineers** and generates **$150 million USD in annual revenue**. We previously delivered a **$40 million contract** for the European Central Bank in 2022.\n\n## Security\nWe hold ISO 27001:2022 certification (#IS-882910).",
+    "seeded_hallucinations": ["25 years ago", "500 full-time engineers", "$150 million USD", "$40 million contract", "European Central Bank"]
+  },
+  {
+    "id": "poisoned_domain_mismatch",
+    "label": "hallucinated",
+    "expected_passed": false,
+    "tender_title": "National Trust - NI - Lead Designer & Multidisciplinary Team for Capital Works Visitor Infrastructure Project",
+    "tender_organization": "THE NATIONAL TRUST FOR PLACES OF HISTORIC INTEREST OR NATURAL BEAUTY",
+    "tender_value": "GBP 40,000.00",
+    "proposal_markdown": "# Proposal for National Trust Visitor Infrastructure Capital Works\n\n## Executive Summary\nApex Innovations brings extensive multidisciplinary civil engineering and heritage stonework experience to deliver physical visitor car park construction, stone bridge restoration, and footpath resurfacing for the National Trust, leveraging our Python FastAPI microservices and pgvector architecture.",
+    "seeded_hallucinations": ["civil engineering", "heritage stonework", "visitor car park construction", "stone bridge restoration"]
+  }
+]
+

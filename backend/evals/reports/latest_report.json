@@ -1,0 +1,391 @@
+{
+  "generated_at": "2026-11-12T07:07:16.739940+00:00",
+  "rag": {
+    "embedding_backend": "sentence-transformers/all-MiniLM-L6-v2",
+    "min_similarity_threshold": 0.39,
+    "baseline": {
+      "total_chunks": 17,
+      "sentence_boundary_integrity": 0.7647,
+      "recall_at_3": 0.8667,
+      "precision_at_3": 0.4333,
+      "recall_at_5": 0.8667,
+      "mrr": 0.8,
+      "negative_rejection_rate": 0.0,
+      "details": [
+        {
+          "id": "pos_iso27001",
+          "answerable": true,
+          "recall_at_3": 0.6667,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.6347
+        },
+        {
+          "id": "pos_soc2",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.6691
+        },
+        {
+          "id": "pos_fedramp_mod",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.5229
+        },
+        {
+          "id": "pos_fastapi",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.4603
+        },
+        {
+          "id": "pos_pgvector",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.4615
+        },
+        {
+          "id": "pos_react_k8s",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.5519
+        },
+        {
+          "id": "pos_headcount",
+          "answerable": true,
+          "recall_at_3": 0.0,
+          "precision_at_3": 0.0,
+          "top_hit_sim": 0.4067
+        },
+        {
+          "id": "pos_sla",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.4712
+        },
+        {
+          "id": "pos_healthcare_case",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.5708
+        },
+        {
+          "id": "pos_cloud_migration",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.6964
+        },
+        {
+          "id": "neg_civil_works",
+          "answerable": false,
+          "returned_chunks": 3,
+          "top_hit_sim": 0.2254
+        },
+        {
+          "id": "neg_sap_payroll",
+          "answerable": false,
+          "returned_chunks": 3,
+          "top_hit_sim": 0.3748
+        },
+        {
+          "id": "neg_marine_welding",
+          "answerable": false,
+          "returned_chunks": 3,
+          "top_hit_sim": 0.3085
+        },
+        {
+          "id": "neg_nuclear_hvac",
+          "answerable": false,
+          "returned_chunks": 3,
+          "top_hit_sim": 0.285
+        }
+      ]
+    },
+    "upgraded": {
+      "total_chunks": 16,
+      "sentence_boundary_integrity": 1.0,
+      "recall_at_3": 0.85,
+      "precision_at_3": 0.5,
+      "recall_at_5": 0.85,
+      "mrr": 0.9,
+      "negative_rejection_rate": 1.0,
+      "details": [
+        {
+          "id": "pos_iso27001",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.6682
+        },
+        {
+          "id": "pos_soc2",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.6667,
+          "top_hit_sim": 0.6704
+        },
+        {
+          "id": "pos_fedramp_mod",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.5,
+          "top_hit_sim": 0.5813
+        },
+        {
+          "id": "pos_fastapi",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.5,
+          "top_hit_sim": 0.5728
+        },
+        {
+          "id": "pos_pgvector",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 1.0,
+          "top_hit_sim": 0.5488
+        },
+        {
+          "id": "pos_react_k8s",
+          "answerable": true,
+          "recall_at_3": 0.5,
+          "precision_at_3": 0.5,
+          "top_hit_sim": 0.4934
+        },
+        {
+          "id": "pos_headcount",
+          "answerable": true,
+          "recall_at_3": 0.0,
+          "precision_at_3": 0.0,
+          "top_hit_sim": 0.0
+        },
+        {
+          "id": "pos_sla",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.3911
+        },
+        {
+          "id": "pos_healthcare_case",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.5,
+          "top_hit_sim": 0.567
+        },
+        {
+          "id": "pos_cloud_migration",
+          "answerable": true,
+          "recall_at_3": 1.0,
+          "precision_at_3": 0.3333,
+          "top_hit_sim": 0.6925
+        },
+        {
+          "id": "neg_civil_works",
+          "answerable": false,
+          "returned_chunks": 0,
+          "top_hit_sim": 0.0
+        },
+        {
+          "id": "neg_sap_payroll",
+          "answerable": false,
+          "returned_chunks": 0,
+          "top_hit_sim": 0.0
+        },
+        {
+          "id": "neg_marine_welding",
+          "answerable": false,
+          "returned_chunks": 0,
+          "top_hit_sim": 0.0
+        },
+        {
+          "id": "neg_nuclear_hvac",
+          "answerable": false,
+          "returned_chunks": 0,
+          "top_hit_sim": 0.0
+        }
+      ]
+    }
+  },
+  "genai": {
+    "execution_mode": "live_gemini_strict",
+    "mean_extraction_precision": 0.7,
+    "mean_extraction_recall": 0.75,
+    "mean_extraction_f1": 0.7222,
+    "mean_requirement_coverage": 0.9,
+    "mean_faithfulness": 1.0,
+    "mean_tender_relevance": 0.925,
+    "telemetry": {
+      "total_calls": 18,
+      "schema_compliance_rate": 0.0,
+      "fallback_rate": 0.5,
+      "p50_latency_ms": 722.73,
+      "p95_latency_ms": 9176.2,
+      "mean_latency_ms": 2712.6,
+      "total_prompt_tokens": 12809,
+      "total_completion_tokens": 4666,
+      "total_tokens": 17475
+    },
+    "details": [
+      {
+        "tender_id": "tender_go_ai_platform",
+        "extraction": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "matched": 7
+        },
+        "proposal_coverage": 1.0,
+        "faithfulness": 1.0,
+        "tender_relevance": 1.0
+      },
+      {
+        "tender_id": "tender_review_partial",
+        "extraction": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "matched": 5
+        },
+        "proposal_coverage": 0.8,
+        "faithfulness": 1.0,
+        "tender_relevance": 0.85
+      },
+      {
+        "tender_id": "tender_nogo_missing_cert",
+        "extraction": {
+          "precision": 0.8,
+          "recall": 1.0,
+          "f1": 0.8889,
+          "matched": 4
+        }
+      },
+      {
+        "tender_id": "tender_nogo_domain_mismatch",
+        "extraction": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "matched": 0
+        }
+      }
+    ]
+  },
+  "agents": {
+    "execution_mode": "live_gemini_strict",
+    "embedding_backend": "sentence-transformers/all-MiniLM-L6-v2",
+    "corpus_chunk_count": 16,
+    "matching": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "per_class": {
+        "SATISFIED": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PARTIALLY_SATISFIED": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "NOT_SATISFIED": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      },
+      "confusion_matrix": {
+        "SATISFIED": {
+          "SATISFIED": 8,
+          "PARTIALLY_SATISFIED": 0,
+          "NOT_SATISFIED": 0
+        },
+        "PARTIALLY_SATISFIED": {
+          "SATISFIED": 0,
+          "PARTIALLY_SATISFIED": 0,
+          "NOT_SATISFIED": 0
+        },
+        "NOT_SATISFIED": {
+          "SATISFIED": 0,
+          "PARTIALLY_SATISFIED": 0,
+          "NOT_SATISFIED": 7
+        }
+      }
+    },
+    "triage": {
+      "accuracy": 0.75,
+      "macro_f1": 0.6,
+      "confusion_matrix": {
+        "GO": {
+          "GO": 1,
+          "REVIEW": 0,
+          "NO_GO": 0
+        },
+        "REVIEW": {
+          "GO": 0,
+          "REVIEW": 0,
+          "NO_GO": 1
+        },
+        "NO_GO": {
+          "GO": 0,
+          "REVIEW": 0,
+          "NO_GO": 2
+        }
+      },
+      "false_positive_go_rate": 0.0,
+      "fit_score_mae": 0.0
+    },
+    "anti_hallucination_review": {
+      "hallucination_tpr": 1.0,
+      "false_alarm_fpr": 0.0,
+      "clean_mean_score": 100.0,
+      "hallucinated_mean_score": 8.33,
+      "score_separation": 91.67,
+      "details": [
+        {
+          "id": "clean_later_chunks_case",
+          "expected_passed": true,
+          "pred_passed": true,
+          "score": 100,
+          "unsupported_claims": []
+        },
+        {
+          "id": "clean_technical_architecture",
+          "expected_passed": true,
+          "pred_passed": true,
+          "score": 100,
+          "unsupported_claims": []
+        },
+        {
+          "id": "poisoned_fake_certifications",
+          "expected_passed": false,
+          "pred_passed": false,
+          "score": 0,
+          "unsupported_claims": []
+        },
+        {
+          "id": "poisoned_inflated_metrics",
+          "expected_passed": false,
+          "pred_passed": false,
+          "score": 15,
+          "unsupported_claims": []
+        },
+        {
+          "id": "poisoned_domain_mismatch",
+          "expected_passed": false,
+          "pred_passed": false,
+          "score": 10,
+          "unsupported_claims": []
+        }
+      ]
+    }
+  }
+}

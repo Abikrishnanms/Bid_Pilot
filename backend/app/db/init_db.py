@@ -46,10 +46,11 @@ def seed_database():
             {"doc_id": doc2.id, "text": "Mock IT Solutions is ISO 9001 certified for quality management systems."}
         ]
         
-        for c in chunks:
+        for idx, c in enumerate(chunks):
             emb = embedding_service.get_embedding(c["text"])
             db.add(schema.DocumentChunk(
                 document_id=c["doc_id"],
+                chunk_index=idx,
                 text_content=c["text"],
                 embedding=emb
             ))

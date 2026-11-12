@@ -8,6 +8,7 @@ import pdfplumber
 
 from ..db.database import get_db
 from ..models import schema
+from ..services.chunking import chunk_text
 from ..services.embedding_service import EmbeddingService
 
 router = APIRouter()
@@ -95,13 +96,46 @@ def list_company_documents(db: Session = Depends(get_db)):
         })
     return results
 
+def _extract_text_from_file(file_path: str) -> str:
+    """Extract UTF-8 or PDF text from a saved document path."""
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".pdf":
+        parts: List[str] = []
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text()
+                if text:
+                    parts.append(text)
+        return "\n".join(parts)
+
+    with open(file_path, "rb") as f:
+        return f.read().decode("utf-8", errors="ignore")
+
+
+def _embed_and_store_chunks(doc_id: int, content: str, db: Session) -> int:
+    """Split text cleanly along sentence boundaries, batch-embed, and store in pgvector."""
+    chunk_items = chunk_text(content, max_chars=550, overlap_sentences=1)
+    if not chunk_items:
+        return 0
+
+    embeddings = embedding_service.embed_chunks([item["text"] for item in chunk_items])
+    for item, emb in zip(chunk_items, embeddings):
+        db.add(schema.DocumentChunk(
+            document_id=doc_id,
+            chunk_index=item["chunk_index"],
+            text_content=item["text"],
+            embedding=emb
+        ))
+    return len(chunk_items)
+
+
 @router.post("/documents/index_text")
 def index_document_text(
     request: DocumentIndexRequest,
     db: Session = Depends(get_db)
 ):
     """Index raw text content into the company vector knowledge base."""
-    filename = request.filename
+    filename = os.path.basename(request.filename)
     content = request.content
     company = db.query(schema.Company).first()
     
@@ -129,30 +163,12 @@ def index_document_text(
     db.commit()
     db.refresh(doc)
 
-    # Chunk text (500 chars with 50 char overlap)
-    chunk_size = 500
-    overlap = 50
-    start = 0
-    chunks = []
-    while start < len(content):
-        chunk_text = content[start:start + chunk_size].strip()
-        if chunk_text:
-            chunks.append(chunk_text)
-        start += (chunk_size - overlap)
-
-    for c in chunks:
-        emb = embedding_service.get_embedding(c)
-        db.add(schema.DocumentChunk(
-            document_id=doc.id,
-            text_content=c,
-            embedding=emb
-        ))
-
+    chunks_count = _embed_and_store_chunks(doc.id, content, db)
     db.commit()
     return {
-        "message": f"Successfully indexed '{filename}' with {len(chunks)} vector chunks.",
+        "message": f"Successfully indexed '{filename}' with {chunks_count} sentence-aware vector chunks.",
         "document_id": doc.id,
-        "chunks_count": len(chunks),
+        "chunks_count": chunks_count,
         "detected_company_email": detected_email
     }
 
@@ -162,37 +178,67 @@ async def upload_company_document(
     db: Session = Depends(get_db)
 ):
     """Upload a real company capability statement, certification, or case study (PDF, TXT, MD, JSON)."""
-    filename = file.filename
-    ext = os.path.splitext(filename)[1].lower()
+    filename = os.path.basename(file.filename)
     save_path = os.path.join(UPLOAD_DIR, filename)
 
     content_bytes = await file.read()
     with open(save_path, "wb") as f:
         f.write(content_bytes)
 
-    # Extract text from file
-    if ext == ".pdf":
-        extracted_text = ""
-        try:
-            with pdfplumber.open(save_path) as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        extracted_text += text + "\n"
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to parse PDF: {str(e)}")
-    else:
-        try:
-            extracted_text = content_bytes.decode("utf-8", errors="ignore")
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to decode text file: {str(e)}")
+    try:
+        extracted_text = _extract_text_from_file(save_path)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse document: {str(e)}")
 
     if not extracted_text.strip():
         raise HTTPException(status_code=400, detail="Document contains no readable text content.")
 
-    # Reuse index logic
     index_req = DocumentIndexRequest(filename=filename, content=extracted_text)
     return index_document_text(index_req, db)
+
+
+@router.post("/documents/reindex")
+def reindex_company_documents(db: Session = Depends(get_db)):
+    """Re-chunk and re-embed all existing company documents using sentence-aware chunking."""
+    docs = db.query(schema.Document).all()
+    if not docs:
+        return {"message": "No documents to reindex.", "reindexed_documents": 0, "total_chunks": 0}
+
+    reindexed_docs = 0
+    total_chunks = 0
+
+    for doc in docs:
+        disk_path = os.path.join(UPLOAD_DIR, os.path.basename(doc.filename))
+        source_text = ""
+        if os.path.exists(disk_path):
+            try:
+                source_text = _extract_text_from_file(disk_path)
+            except Exception:
+                source_text = ""
+
+        if not source_text.strip():
+            old_chunks = (
+                db.query(schema.DocumentChunk)
+                .filter(schema.DocumentChunk.document_id == doc.id)
+                .order_by(schema.DocumentChunk.chunk_index.asc().nullslast(), schema.DocumentChunk.id.asc())
+                .all()
+            )
+            source_text = "\n\n".join(c.text_content for c in old_chunks if c.text_content)
+
+        if not source_text.strip():
+            continue
+
+        db.query(schema.DocumentChunk).filter(schema.DocumentChunk.document_id == doc.id).delete()
+        count = _embed_and_store_chunks(doc.id, source_text, db)
+        reindexed_docs += 1
+        total_chunks += count
+
+    db.commit()
+    return {
+        "message": f"Re-indexed {reindexed_docs} documents into {total_chunks} sentence-aware chunks.",
+        "reindexed_documents": reindexed_docs,
+        "total_chunks": total_chunks
+    }
 
 @router.delete("/documents/{doc_id}")
 def delete_company_document(doc_id: int, db: Session = Depends(get_db)):
@@ -234,10 +280,16 @@ def clear_sample_documents(db: Session = Depends(get_db)):
 @router.get("/documents/{doc_id}/chunks")
 def get_document_chunks(doc_id: int, db: Session = Depends(get_db)):
     """Inspect the pgvector chunks indexed for a specific company document."""
-    chunks = db.query(schema.DocumentChunk).filter(schema.DocumentChunk.document_id == doc_id).all()
+    chunks = (
+        db.query(schema.DocumentChunk)
+        .filter(schema.DocumentChunk.document_id == doc_id)
+        .order_by(schema.DocumentChunk.chunk_index.asc().nullslast(), schema.DocumentChunk.id.asc())
+        .all()
+    )
     return [{
         "id": c.id,
         "document_id": c.document_id,
+        "chunk_index": c.chunk_index,
         "snippet": c.text_content,
         "length": len(c.text_content)
     } for c in chunks]

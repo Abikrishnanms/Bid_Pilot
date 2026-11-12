@@ -8,8 +8,8 @@ from ..schemas.tender import ProposalDraft
 logger = logging.getLogger(__name__)
 
 class ProposalAgent:
-    def __init__(self):
-        self.llm_provider = get_llm_provider()
+    def __init__(self, llm_provider=None):
+        self.llm_provider = llm_provider or get_llm_provider()
 
     def generate_proposal(self, tender_id: int, db: Session) -> schema.Proposal:
         """

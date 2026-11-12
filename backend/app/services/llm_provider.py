@@ -1,8 +1,121 @@
-import os
+from dataclasses import dataclass, asdict
+from datetime import datetime, timezone
 import json
+import logging
+import math
+import os
+import re
+import threading
+import time
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Type
+from typing import Any, Dict, List, Optional, Type
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class LLMCallRecord:
+    timestamp: str
+    schema_name: str
+    provider: str
+    model_used: str
+    latency_ms: float
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+    fallback_triggered: bool = False
+    schema_valid: bool = True
+    error: Optional[str] = None
+
+
+class LLMTelemetryTracker:
+    """Thread-safe collector for LLM latency, token usage, schema compliance, and fallbacks."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._records: List[LLMCallRecord] = []
+
+    def record(self, entry: LLMCallRecord) -> None:
+        with self._lock:
+            self._records.append(entry)
+
+    def reset(self) -> None:
+        with self._lock:
+            self._records.clear()
+
+    def records(self) -> List[Dict[str, Any]]:
+        with self._lock:
+            return [asdict(r) for r in self._records]
+
+    def summary(self) -> Dict[str, Any]:
+        with self._lock:
+            items = list(self._records)
+
+        if not items:
+            return {
+                "total_calls": 0,
+                "schema_compliance_rate": 0.0,
+                "fallback_rate": 0.0,
+                "p50_latency_ms": 0.0,
+                "p95_latency_ms": 0.0,
+                "mean_latency_ms": 0.0,
+                "total_prompt_tokens": 0,
+                "total_completion_tokens": 0,
+                "total_tokens": 0,
+            }
+
+        latencies = sorted(r.latency_ms for r in items)
+        n = len(items)
+        p50 = latencies[int(0.50 * (n - 1))]
+        p95 = latencies[min(n - 1, math.ceil(0.95 * (n - 1)))]
+        valid_no_fallback = sum(1 for r in items if r.schema_valid and not r.fallback_triggered)
+        fallbacks = sum(1 for r in items if r.fallback_triggered)
+
+        return {
+            "total_calls": n,
+            "schema_compliance_rate": round(valid_no_fallback / n, 4),
+            "fallback_rate": round(fallbacks / n, 4),
+            "p50_latency_ms": round(p50, 2),
+            "p95_latency_ms": round(p95, 2),
+            "mean_latency_ms": round(sum(latencies) / n, 2),
+            "total_prompt_tokens": sum(r.prompt_tokens for r in items),
+            "total_completion_tokens": sum(r.completion_tokens for r in items),
+            "total_tokens": sum(r.total_tokens for r in items),
+        }
+
+
+_TELEMETRY = LLMTelemetryTracker()
+
+
+def get_llm_telemetry() -> LLMTelemetryTracker:
+    return _TELEMETRY
+
+
+def _extract_token_counts(response: Any) -> tuple[int, int, int]:
+    usage = getattr(response, "usage_metadata", None)
+    if usage is None:
+        return 0, 0, 0
+    if isinstance(usage, dict):
+        p = int(usage.get("prompt_token_count", 0) or 0)
+        c = int(usage.get("candidates_token_count", 0) or 0)
+        t = int(usage.get("total_token_count", p + c) or (p + c))
+        return p, c, t
+    p = int(getattr(usage, "prompt_token_count", 0) or 0)
+    c = int(getattr(usage, "candidates_token_count", 0) or 0)
+    t = int(getattr(usage, "total_token_count", p + c) or (p + c))
+    return p, c, t
+
+
+def _strip_json_fences(raw_text: str) -> str:
+    cleaned = raw_text.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return cleaned.strip()
 
 class LLMProvider(ABC):
     @abstractmethod
@@ -10,7 +123,31 @@ class LLMProvider(ABC):
         pass
 
 class MockLLMProvider(LLMProvider):
-    def extract_structured_data(self, text: str, schema: Type[BaseModel], prompt: str) -> BaseModel:
+    def extract_structured_data(
+        self,
+        text: str,
+        schema: Type[BaseModel],
+        prompt: str,
+        record_telemetry: bool = True,
+    ) -> BaseModel:
+        start_time = time.perf_counter()
+        result = self._build_mock_response(schema)
+        if record_telemetry:
+            _TELEMETRY.record(
+                LLMCallRecord(
+                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    schema_name=schema.__name__,
+                    provider="mock",
+                    model_used="mock-llm",
+                    latency_ms=round((time.perf_counter() - start_time) * 1000, 2),
+                    fallback_triggered=False,
+                    schema_valid=True,
+                )
+            )
+        return result
+
+    @staticmethod
+    def _build_mock_response(schema: Type[BaseModel]) -> BaseModel:
         from ..schemas.tender import ExtractedRequirements, MatchResult, ProposalDraft, ProposalReviewResult
         
         if schema == ExtractedRequirements:
@@ -78,16 +215,37 @@ class MockLLMProvider(LLMProvider):
         # Generic fallback
         return schema(**{})
 
+def _parse_rate_limit_delay(err_msg: str) -> Optional[float]:
+    """Return bounded retry delay (seconds) only for HTTP 429 rate-limit errors."""
+    lowered = (err_msg or "").lower()
+    if "429" not in lowered and "rate-limit" not in lowered and "quota exceeded" not in lowered:
+        return None
+    m = re.search(r"retry\s+in\s+(\d+(?:\.\d+)?)s", lowered)
+    if m:
+        return min(65.0, max(5.0, float(m.group(1)) + 2.0))
+    m_sec = re.search(r"seconds:\s*(\d+)", lowered)
+    if m_sec:
+        return min(65.0, max(5.0, float(m_sec.group(1)) + 2.0))
+    return 45.0
+
+
 class GeminiProvider(LLMProvider):
-    def __init__(self):
+    def __init__(self, strict_mode: Optional[bool] = None):
         import google.generativeai as genai
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is missing.")
         genai.configure(api_key=api_key)
         
-        # gemini-3.8-flash is the active generation model for Google AI Studio
+        self.strict_mode = (
+            strict_mode
+            if strict_mode is not None
+            else os.getenv("LLM_STRICT_MODE", "false").lower() in {"1", "true", "yes"}
+        )
+        # Primary: gemini-3.8-flash (with GEMINI_MODEL env override), Fallback: gemini-3.5-flash-lite
         model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+        self.timeout_seconds = int(os.getenv("LLM_TIMEOUT_SECONDS", "45"))
+        self.retry_on_429 = os.getenv("LLM_RETRY_ON_429", "true").lower() in {"1", "true", "yes"}
         self.model = genai.GenerativeModel(model_name)
 
     def extract_structured_data(self, text: str, schema: Type[BaseModel], prompt: str) -> BaseModel:
@@ -104,51 +262,102 @@ class GeminiProvider(LLMProvider):
         if text:
             contents.append(f"Input Document Text:\n{text}")
 
-        models_to_try = [
-            os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
-            "gemini-3.5-flash-lite"
-        ]
+        primary_model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+        models_to_try = list(dict.fromkeys([primary_model, "gemini-3.5-flash-lite"]))
         
         last_exception = None
-        for model_name in models_to_try:
-            try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(
-                    contents,
-                    generation_config=genai.GenerationConfig(
-                        response_mime_type="application/json",
-                        temperature=0.1
-                    ),
-                    request_options={"timeout": 15}
-                )
-                raw_text = response.text.strip()
-                # Strip markdown fences if present
-                if raw_text.startswith("```json"):
-                    raw_text = raw_text[7:]
-                if raw_text.startswith("```"):
-                    raw_text = raw_text[3:]
-                if raw_text.endswith("```"):
-                    raw_text = raw_text[:-3]
-                raw_text = raw_text.strip()
+        max_rounds = 2 if self.retry_on_429 else 1
 
-                data = json.loads(raw_text)
-                return schema(**data)
-            except Exception as e:
-                last_exception = e
-                import logging
-                logging.getLogger(__name__).warning(f"Model {model_name} failed or quota reached ({str(e)[:120]}). Trying fallback...")
+        for round_idx in range(max_rounds):
+            saw_rate_limit_delay: Optional[float] = None
+            for idx, model_name in enumerate(models_to_try):
+                call_start = time.perf_counter()
+                try:
+                    model = genai.GenerativeModel(model_name)
+                    response = model.generate_content(
+                        contents,
+                        generation_config=genai.GenerationConfig(
+                            response_mime_type="application/json",
+                            temperature=0.1
+                        ),
+                        request_options={"timeout": self.timeout_seconds}
+                    )
+                    raw_text = _strip_json_fences(response.text)
+                    data = json.loads(raw_text)
+                    validated = schema(**data)
 
-        import logging
-        logging.getLogger(__name__).warning(f"All Gemini models exhausted ({last_exception}). Falling back to MockLLMProvider for offline reliability.")
-        return MockLLMProvider().extract_structured_data(text, schema, prompt)
+                    prompt_toks, comp_toks, total_toks = _extract_token_counts(response)
+                    _TELEMETRY.record(
+                        LLMCallRecord(
+                            timestamp=datetime.now(timezone.utc).isoformat(),
+                            schema_name=schema.__name__,
+                            provider="gemini",
+                            model_used=model_name,
+                            latency_ms=round((time.perf_counter() - call_start) * 1000, 2),
+                            prompt_tokens=prompt_toks,
+                            completion_tokens=comp_toks,
+                            total_tokens=total_toks,
+                            fallback_triggered=(idx > 0),
+                            schema_valid=True,
+                        )
+                    )
+                    return validated
+                except Exception as e:
+                    last_exception = e
+                    delay = _parse_rate_limit_delay(str(e))
+                    if delay is not None:
+                        saw_rate_limit_delay = delay
+                    _TELEMETRY.record(
+                        LLMCallRecord(
+                            timestamp=datetime.now(timezone.utc).isoformat(),
+                            schema_name=schema.__name__,
+                            provider="gemini",
+                            model_used=model_name,
+                            latency_ms=round((time.perf_counter() - call_start) * 1000, 2),
+                            fallback_triggered=(idx > 0),
+                            schema_valid=False,
+                            error=str(e)[:200],
+                        )
+                    )
+                    logger.warning(f"Model {model_name} failed or quota reached ({str(e)[:120]}). Trying fallback...")
 
-def get_llm_provider() -> LLMProvider:
+            if round_idx == 0 and saw_rate_limit_delay is not None and self.retry_on_429:
+                logger.info(f"Rate limit (429) hit across Gemini models; sleeping {saw_rate_limit_delay:.1f}s before retry...")
+                time.sleep(saw_rate_limit_delay)
+            else:
+                break
+
+        if self.strict_mode:
+            raise RuntimeError(f"All Gemini models failed in strict_mode: {last_exception}")
+
+        logger.warning(f"All Gemini models exhausted ({last_exception}). Falling back to MockLLMProvider for offline reliability.")
+        _TELEMETRY.record(
+            LLMCallRecord(
+                timestamp=datetime.now(timezone.utc).isoformat(),
+                schema_name=schema.__name__,
+                provider="mock_fallback",
+                model_used="mock-llm",
+                latency_ms=0.0,
+                fallback_triggered=True,
+                schema_valid=True,
+                error=str(last_exception)[:200] if last_exception else None,
+            )
+        )
+        return MockLLMProvider().extract_structured_data(text, schema, prompt, record_telemetry=False)
+
+def get_llm_provider(strict_mode: Optional[bool] = None) -> LLMProvider:
+    is_strict = (
+        strict_mode
+        if strict_mode is not None
+        else os.getenv("LLM_STRICT_MODE", "false").lower() in {"1", "true", "yes"}
+    )
     provider_name = os.getenv("LLM_PROVIDER", "mock").lower()
     if provider_name == "gemini":
         try:
-            return GeminiProvider()
+            return GeminiProvider(strict_mode=is_strict)
         except Exception as e:
-            import logging
-            logging.getLogger(__name__).error(f"Failed to initialize GeminiProvider: {e}. Falling back to MockLLMProvider.")
+            if is_strict:
+                raise
+            logger.error(f"Failed to initialize GeminiProvider: {e}. Falling back to MockLLMProvider.")
             return MockLLMProvider()
     return MockLLMProvider()
